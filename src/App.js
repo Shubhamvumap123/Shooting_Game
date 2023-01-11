@@ -149,7 +149,6 @@ function App() {
                     
 
                     </div>
-       <div className='w-20'></div>
        <div className='w-1/2 h-full rounded-3xl'>
        <h1 className='italic font-bold text-2xl'>All Instruction are achive BY press Keyboard keys</h1>
 
