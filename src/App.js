@@ -132,7 +132,7 @@ function App() {
       </div>
 
     <div className='flex items-center justify-center h-screen'>
-      <canvas className='w-1/2 h-2/3 rounded-3xl'style={{
+      <canvas className='w-2/3 h-2/3 rounded-3xl'style={{
                       backgroundRepeat: "no-repeat",
                       backgroundSize: "cover",
                       backgroundPosition: "center",
@@ -140,24 +140,17 @@ function App() {
                     }} ref={canvasRef} >
        </canvas>
        <div className='w-10'></div>
-       <div className='md:w-1/2 md:h-2/3 bg-white shadow-2xl rounded-3xl flex items-center justify-center text-center'    >
-   <div className='w-1/3 h-full rounded-3xl' style={{
-                      backgroundSize: "cover",
-                     objectFit:"cover",
-                      backgroundImage: "url(/Image/arrows.png)",
-                    }}>
-                    
-
-                    </div>
+       <div className='md:w-1/2 md:h-2/3 bg-white shadow-2xl rounded-3xl flex items-center justify-center text-left'    >
+  
        <div className='w-1/2 h-full rounded-3xl'>
-       <h1 className='italic font-bold text-2xl'>All Instruction are achive BY press Keyboard keys</h1>
+       <h1 className='italic font-bold text-xl'>All Instruction are achive BY press Keyboard keys</h1>
 
-       <h1 className='italic font-bold text-lg mt-10'>Top: Move Gun to up derection</h1>
-                      <h1 className='italic font-bold text-lg  '>Down: Move Gun to down derection</h1>
-                      <h1 className='italic font-bold text-lg '>Next: Move Gun to left derection</h1>
-                      <h1 className='italic font-bold text-lg '>Back: Move Gun to right derection</h1>
-                      <h1 className='italic font-bold text-lg '>If We click on "Enter" Button Gun will Fire .</h1>
-                      <h1 className='italic font-bold text-lg '>Gun only can Move inside a context</h1>
+       <h1 className='italic font-bold text-base mt-4'>Top: Move Gun to up derection</h1>
+                      <h1 className='italic font-bold text-base  '>Down: Move Gun to down derection</h1>
+                      <h1 className='italic font-bold text-base '>Left: Move Gun to left derection</h1>
+                      <h1 className='italic font-bold text-base '>Right: Move Gun to right derection</h1>
+                      <h1 className='italic font-bold text-base '>If We click on "Enter" Button Gun will Fire .</h1>
+                      <h1 className='italic font-bold text-base '>Gun only can Move inside a context</h1>
        </div>
        </div>
     </div>
