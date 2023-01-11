@@ -143,14 +143,14 @@ function App() {
        <div className='md:w-1/2 md:h-2/3 bg-white shadow-2xl rounded-3xl flex items-center justify-center text-left'    >
   
        <div className='w-1/2 h-full rounded-3xl'>
-       <h1 className='italic font-bold text-xl'>All Instruction are achive BY press Keyboard keys</h1>
+       <h1 className='italic font-bold text-2xl'>All Instruction are achive BY press Keyboard keys</h1>
 
-       <h1 className='italic font-bold text-base mt-4'>"Top": Move Gun to up derection</h1>
-                      <h1 className='italic font-bold text-base  '>"Down": Move Gun to down derection</h1>
-                      <h1 className='italic font-bold text-base '>"Left": Move Gun to left derection</h1>
-                      <h1 className='italic font-bold text-base '>"Right": Move Gun to right derection</h1>
-                      <h1 className='italic font-bold text-base '>If We click on "Enter" Button Gun will Fire .</h1>
-                      <h1 className='italic font-bold text-base '>Gun only can Move inside a context</h1>
+       <h1 className='italic font-bold text-lg mt-4'>"Top": Move Gun to up derection</h1>
+                      <h1 className='italic font-bold text-lg  '>"Down": Move Gun to down derection</h1>
+                      <h1 className='italic font-bold text-lg '>"Left": Move Gun to left derection</h1>
+                      <h1 className='italic font-bold text-lg '>"Right": Move Gun to right derection</h1>
+                      <h1 className='italic font-bold text-lg '>If We click on "Enter" Button Gun will Fire .</h1>
+                      <h1 className='italic font-bold text-lg '>Gun only can Move inside a context</h1>
        </div>
        </div>
     </div>
