@@ -145,10 +145,10 @@ function App() {
        <div className='w-1/2 h-full rounded-3xl'>
        <h1 className='italic font-bold text-xl'>All Instruction are achive BY press Keyboard keys</h1>
 
-       <h1 className='italic font-bold text-base mt-4'>Top: Move Gun to up derection</h1>
-                      <h1 className='italic font-bold text-base  '>Down: Move Gun to down derection</h1>
-                      <h1 className='italic font-bold text-base '>Left: Move Gun to left derection</h1>
-                      <h1 className='italic font-bold text-base '>Right: Move Gun to right derection</h1>
+       <h1 className='italic font-bold text-base mt-4'>"Top": Move Gun to up derection</h1>
+                      <h1 className='italic font-bold text-base  '>"Down": Move Gun to down derection</h1>
+                      <h1 className='italic font-bold text-base '>"Left": Move Gun to left derection</h1>
+                      <h1 className='italic font-bold text-base '>"Right": Move Gun to right derection</h1>
                       <h1 className='italic font-bold text-base '>If We click on "Enter" Button Gun will Fire .</h1>
                       <h1 className='italic font-bold text-base '>Gun only can Move inside a context</h1>
        </div>
