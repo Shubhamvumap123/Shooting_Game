@@ -141,7 +141,7 @@ function App() {
        </canvas>
        <div className='w-10'></div>
        <div className='md:w-1/2 md:h-2/3 bg-white shadow-2xl rounded-3xl flex items-center justify-center text-center'    >
-   <div className='w-1/2 h-full rounded-3xl' style={{
+   <div className='w-1/3 h-full rounded-3xl' style={{
                       backgroundSize: "cover",
                      objectFit:"cover",
                       backgroundImage: "url(/Image/arrows.png)",
