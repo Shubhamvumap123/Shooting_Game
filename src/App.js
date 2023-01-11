@@ -129,7 +129,6 @@ function App() {
        <div class="text-center text-amber-300 ">
         <h1 className='italic font-bold text-5xl'>Gun_Shooter_Game</h1>
        </div>
-
       </div>
 
     <div className='flex items-center justify-center h-screen'>
