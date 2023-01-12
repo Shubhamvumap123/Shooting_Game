@@ -142,7 +142,7 @@ function App() {
        <div className='w-10'></div>
        <div className='w-60 h-96 md:w-1/2 md:h-2/3 bg-white shadow-2xl rounded-3xl flex items-center justify-center text-left'    >
   
-       <div className='overflow-scroll md:overflow-y-scroll w-3/4 h-full rounded-3xl '>
+       <div className='overflow-scroll md:overflow-y-scroll md:mt-7 w-3/4 h-full rounded-3xl '>
                       <h1 className='italic font-bold text-sm md:text-2xl'>All Instruction are achive BY press Keyboard keys</h1>
                       <h1 className='italic font-bold text-xs md:text-lg mt-4'>"Top": Move Gun to up derection</h1>
                       <h1 className='italic font-bold text-xs md:text-lg  '>"Down": Move Gun to down derection</h1>
