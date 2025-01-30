@@ -1,6 +1,7 @@
 
 import './App.css';
 import { useEffect, useRef ,useContext} from 'react';
+import gun from './Target/gun.png';
 import target from './Target/TargetData.';
 function App() {
   const canvasRef = useRef(null);
@@ -12,6 +13,8 @@ function App() {
   let bullet = [],rightKey = false,  leftKey = false, upKey = false,  downKey = false
   let BullWidth = 3
   let BullHeight = 7
+  let playerImage = new Image();
+  playerImage.src =gun ;
   function backgroundRemove() {
     ctx.clearRect(0, 0, width, height); 
   }
@@ -33,8 +36,9 @@ function App() {
     if ((player_x + player_w) >= width) player_x = width - player_w;
     if (player_y <= 0) player_y = 0;
     if ((player_y + player_h) >= height) player_y = height - player_h;
-    ctx.fillStyle = "DarkOrange";
-    ctx.fillRect(player_x, player_y, player_w, player_h);
+    ctx.drawImage(playerImage, player_x, player_y, player_w, player_h);
+    // ctx.fillStyle = "DarkOrange";
+    // ctx.fillRect(player_x, player_y, player_w, player_h);
   }
 
  //Bullete Create
@@ -81,7 +85,6 @@ function App() {
       Bullet[1] + BullHeight > Enemy.y
    ){
       Enemy.takeDamage(damage);
-      console.log("damage",damage)
       return true
     }
     return false;
@@ -125,22 +128,22 @@ function App() {
 
   return (
     <div className=' bg-gray-900 '>
-      <div flex items-center justify-center>
+      {/* <div flex items-center justify-center>
        <div class="text-center text-amber-300 ">
         <h1 className='italic font-bold text-5xl'>Gun_Shooter_Game</h1>
        </div>
-      </div>
+      </div> */}
 
     <div className='flex items-center justify-center h-screen'>
-      <canvas className='w-2/3 h-2/3 rounded-3xl'style={{
+      <canvas className='w-full h-full rounded-3xl'style={{
                       backgroundRepeat: "no-repeat",
                       backgroundSize: "cover",
                       backgroundPosition: "center",
                       backgroundImage: "url(/Image/Anime.gif)",
                     }} ref={canvasRef} >
        </canvas>
-       <div className='w-10'></div>
-       <div className='w-60 h-96 md:w-1/2 md:h-2/3 bg-white shadow-2xl rounded-3xl flex items-center justify-center text-left'    >
+       {/* <div className='w-10'></div> */}
+       {/* <div className='w-60 h-96 md:w-1/2 md:h-2/3 bg-white shadow-2xl rounded-3xl flex items-center justify-center text-left'    >
   
        <div className='overflow-scroll md:overflow-y-scroll md:mt-7 w-3/4 h-full rounded-3xl '>
                       <h1 className='italic font-bold text-sm md:text-2xl'>All Instruction are achive BY press Keyboard keys</h1>
@@ -151,7 +154,7 @@ function App() {
                       <h1 className='italic font-bold text-xs md:text-lg '>If We click on "Enter" Button Gun will Fire .</h1>
                       <h1 className='italic font-bold text-xs md:text-lg '>Gun only can Move inside a context</h1>
        </div>
-       </div>
+       </div> */}
     </div>
     </div>
 
