@@ -1,9 +1,10 @@
 
 import './App.css';
-import { useEffect, useRef ,useContext} from 'react';
+import { useEffect, useRef ,useContext, useState} from 'react';
 import gun from './Target/gun.png';
 import target from './Target/TargetData.';
 function App() {
+  const [showGuide, setShowGuide] = useState(true);
   const canvasRef = useRef(null);
   let canvas, ctx,
   damage = 1,
@@ -155,7 +156,36 @@ function App() {
                       <h1 className='italic font-bold text-xs md:text-lg '>Gun only can Move inside a context</h1>
        </div>
        </div> */}
+      {showGuide && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+          <div className="bg-white rounded-2xl shadow-xl p-6 w-80 md:w-96 text-gray-800 relative">
+            <h2 className="text-xl font-bold mb-2 text-center text-amber-600">How to Play</h2>
+            <ul className="list-disc pl-5 space-y-2 text-sm md:text-base">
+              <li>Use <span className="font-semibold">Arrow Keys</span> to move the gun:
+                <ul className="pl-4 list-[circle]">
+                  <li><b>Up</b>: Move gun up</li>
+                  <li><b>Down</b>: Move gun down</li>
+                  <li><b>Left</b>: Move gun left</li>
+                  <li><b>Right</b>: Move gun right</li>
+                </ul>
+              </li>
+              <li>Press <span className="font-semibold">Enter</span> to fire.</li>
+              <li>The gun can only move inside the canvas area.</li>
+              <li>Hit all targets to win!</li>
+            </ul>
+            <button
+              className="mt-4 w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded"
+              onClick={() => setShowGuide(false)}
+            >
+              Start Game
+            </button>
+          </div>
+      </div>)}
+
+
+       
     </div>
+
     </div>
 
   );
