@@ -5,6 +5,7 @@ import gun from './Target/gun.png';
 import target from './Target/TargetData.';
 function App() {
   const [showGuide, setShowGuide] = useState(true);
+  const [showWin, setShowWin] = useState(false);
   const canvasRef = useRef(null);
   let canvas, ctx,
   damage = 1,
@@ -93,22 +94,27 @@ function App() {
 
   //loop according to working
   function Looping(){     
-    backgroundRemove();
-    movebullet();
-    drawplayer();
-    drawbullet();
-    target.forEach((tar) =>{
-      if (checkcolidewith(tar)) {
-        if (tar.health <= 0) {
-          const index = target.indexOf(tar);
-          target.splice(index, 1);
-          console.log(tar.health)
-        }
-      } else {
-        tar.draw(ctx);
+  backgroundRemove();
+  movebullet();
+  drawplayer();
+  drawbullet();
+  target.forEach((tar) =>{
+    if (checkcolidewith(tar)) {
+      if (tar.health <= 0) {
+        const index = target.indexOf(tar);
+        target.splice(index, 1);
+        console.log(tar.health)
       }
-    })
+    } else {
+      tar.draw(ctx);
+    }
+  });
+
+  // Show win animation if all targets are killed
+  if (target.length === 0 && !showWin) {
+    setShowWin(true);
   }
+}
 
   function keyDown(e) {
     if (e.code == "ArrowRight") rightKey = true;
@@ -181,7 +187,24 @@ function App() {
             </button>
           </div>
       </div>)}
-
+{showWin && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
+    <div className="bg-white rounded-2xl shadow-2xl p-8 flex flex-col items-center animate-bounce">
+      <svg className="w-16 h-16 text-green-500 mb-4 animate-ping" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M9 12l2 2 4-4" />
+      </svg>
+      <h2 className="text-2xl font-bold text-green-600 mb-2">Congratulations!</h2>
+      <p className="text-lg text-gray-700 mb-4">You have killed all enemies!</p>
+      <button
+        className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-6 rounded"
+        onClick={() => window.location.reload()}
+      >
+        Play Again
+      </button>
+    </div>
+  </div>
+)}
 
        
     </div>
