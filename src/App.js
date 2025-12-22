@@ -1,6 +1,6 @@
 
 import './App.css';
-import { useEffect, useRef ,useContext, useState} from 'react';
+import { useEffect, useRef, useState} from 'react';
 import gun from './Target/gun.png';
 import target from './Target/TargetData.';
 
@@ -12,38 +12,43 @@ function App() {
   const [showGuide, setShowGuide] = useState(true);
   const [showWin, setShowWin] = useState(false);
   const canvasRef = useRef(null);
-  let canvas, ctx,
-  damage = 1,
-   width = 300,
-   height = 150,
-  player_x = (width / 2) - 25, player_y = height - 25, player_w = 20, player_h = 20
-  let bullet = [],rightKey = false,  leftKey = false, upKey = false,  downKey = false
-  let BullWidth = 3
-  let BullHeight = 7
+
+  // Game state refs to persist across renders without causing re-renders
+  const gameState = useRef({
+    canvas: null,
+    ctx: null,
+    damage: 1,
+    width: 300,
+    height: 150,
+    player_x: (300 / 2) - 25,
+    player_y: 150 - 25,
+    player_w: 20,
+    player_h: 20,
+    bullet: [],
+    rightKey: false,
+    leftKey: false,
+    upKey: false,
+    downKey: false,
+    BullWidth: 3,
+    BullHeight: 7
+  });
 
   function backgroundRemove() {
-    ctx.clearRect(0, 0, width, height); 
+    const { ctx, width, height } = gameState.current;
+    if (ctx) ctx.clearRect(0, 0, width, height);
   }
 
   useEffect(() => {
-    canvas = canvasRef.current;
-    ctx = canvas.getContext('2d');
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    gameState.current.canvas = canvas;
+    gameState.current.ctx = ctx;
 
     // Performance optimization: Use requestAnimationFrame instead of setInterval
     // This syncs with browser refresh rate (usually 60fps) and pauses when tab is inactive
     let animationFrameId;
-    let lastTime = 0;
-    const fps = 50; // Maintain original ~50fps logic (1000/20 = 50)
-    const interval = 1000 / fps;
 
-    const renderLoop = (timestamp) => {
-      // Throttle to target FPS if needed, or just run freely.
-      // The original was 20ms = 50fps.
-      // rAF is usually 60fps (16.6ms). Running slightly faster is usually fine for games.
-      // But to match game speed logic exactly, we can check delta.
-      // However, for this simple game, running at 60fps instead of 50fps is a free smoothness upgrade.
-      // Let's stick to simple rAF for maximum smoothness.
-
+    const renderLoop = () => {
       Looping();
       animationFrameId = window.requestAnimationFrame(renderLoop);
     };
@@ -59,38 +64,44 @@ function App() {
       document.removeEventListener('keydown', keyDown);
       document.removeEventListener('keyup', keyUp);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function drawplayer() {
-    if (rightKey) player_x += 3;
-    else if (leftKey) player_x -= 3;
-    if (upKey) player_y -= 3;
-    else if (downKey) player_y += 3;
-    if (player_x <= 0) player_x = 0;
-    if ((player_x + player_w) >= width) player_x = width - player_w;
-    if (player_y <= 0) player_y = 0;
-    if ((player_y + player_h) >= height) player_y = height - player_h;
-    ctx.drawImage(playerImage, player_x, player_y, player_w, player_h);
-    // ctx.fillStyle = "DarkOrange";
-    // ctx.fillRect(player_x, player_y, player_w, player_h);
+    let state = gameState.current;
+    if (state.rightKey) state.player_x += 3;
+    else if (state.leftKey) state.player_x -= 3;
+    if (state.upKey) state.player_y -= 3;
+    else if (state.downKey) state.player_y += 3;
+
+    // Boundaries
+    if (state.player_x <= 0) state.player_x = 0;
+    if ((state.player_x + state.player_w) >= state.width) state.player_x = state.width - state.player_w;
+    if (state.player_y <= 0) state.player_y = 0;
+    if ((state.player_y + state.player_h) >= state.height) state.player_y = state.height - state.player_h;
+
+    if (state.ctx) state.ctx.drawImage(playerImage, state.player_x, state.player_y, state.player_w, state.player_h);
   }
 
  //Bullete Create
  function drawbullet() {
+  const { bullet, ctx } = gameState.current;
   if (bullet.length)
     for (var i = 0; i < bullet.length; i++) {
-      ctx.fillStyle = 'FireBrick';
-      ctx.fillRect(bullet[i][0], bullet[i][1], bullet[i][2], bullet[i][3])
+      if (ctx) {
+        ctx.fillStyle = 'FireBrick';
+        ctx.fillRect(bullet[i][0], bullet[i][1], bullet[i][2], bullet[i][3])
+      }
     }   
 }
 
 //Bullet Move 
   function movebullet() {
+    const { bullet } = gameState.current;
     for (var i = 0; i < bullet.length; i++) {
       if (bullet[i][1] > -11) {
         bullet[i][1] -= 10;
       } else if (bullet[i][1] < -10) {
-        // console.log(bullet.splice(i, 1))
         bullet.splice(i, 1);
       }
     }
@@ -98,9 +109,9 @@ function App() {
 
 // Check for Bullet Collide
    function checkcolidewith(target){
+      const { bullet } = gameState.current;
       return bullet.some((bull) => {
-        // console.log(bull)
-        if (collideWith(bull,target)==true) {
+        if (collideWith(bull,target) === true) {
           bullet.splice(bullet.indexOf(bull), 1);
           return true;
         }
@@ -111,7 +122,7 @@ function App() {
    //Collide happen conditions
  function collideWith(Bullet,Enemy) 
  {  
-
+    const { BullWidth, BullHeight, damage } = gameState.current;
     if (
       Bullet[0] < Enemy.x + Enemy.width &&
       Bullet[0] + BullWidth > Enemy.x &&
@@ -126,6 +137,7 @@ function App() {
 
   //loop according to working
   function Looping(){     
+  const { ctx } = gameState.current;
   backgroundRemove();
   movebullet();
   drawplayer();
@@ -137,7 +149,7 @@ function App() {
         target.splice(index, 1);
       }
     } else {
-      tar.draw(ctx);
+      if (ctx) tar.draw(ctx);
     }
   });
 
@@ -148,20 +160,22 @@ function App() {
 }
 
   function keyDown(e) {
-    if (e.code == "ArrowRight") rightKey = true;
-    else if (e.code == "ArrowLeft") leftKey = true;
-    if (e.code == "ArrowUp") upKey = true;
-    else if (e.code == "ArrowDown") downKey = true;
-    if (e.key == "Enter" ){
-      bullet.push([player_x + 7 , player_y , BullWidth, BullHeight]);
+    const state = gameState.current;
+    if (e.code === "ArrowRight") state.rightKey = true;
+    else if (e.code === "ArrowLeft") state.leftKey = true;
+    if (e.code === "ArrowUp") state.upKey = true;
+    else if (e.code === "ArrowDown") state.downKey = true;
+    if (e.key === "Enter" ){
+      state.bullet.push([state.player_x + 7 , state.player_y , state.BullWidth, state.BullHeight]);
     }
   }
  
   function keyUp(e) {
-    if (e.code == "ArrowRight") rightKey = false;
-    else if (e.code == "ArrowLeft") leftKey = false;
-    if (e.code == "ArrowUp") upKey = false;
-    else if (e.code == "ArrowDown") downKey = false;
+    const state = gameState.current;
+    if (e.code === "ArrowRight") state.rightKey = false;
+    else if (e.code === "ArrowLeft") state.leftKey = false;
+    if (e.code === "ArrowUp") state.upKey = false;
+    else if (e.code === "ArrowDown") state.downKey = false;
   }
 
   return (
