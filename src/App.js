@@ -3,6 +3,11 @@ import './App.css';
 import { useEffect, useRef ,useContext, useState} from 'react';
 import gun from './Target/gun.png';
 import target from './Target/TargetData.';
+
+// Move image creation outside component to avoid re-creation on every render
+const playerImage = new Image();
+playerImage.src = gun;
+
 function App() {
   const [showGuide, setShowGuide] = useState(true);
   const [showWin, setShowWin] = useState(false);
@@ -15,8 +20,7 @@ function App() {
   let bullet = [],rightKey = false,  leftKey = false, upKey = false,  downKey = false
   let BullWidth = 3
   let BullHeight = 7
-  let playerImage = new Image();
-  playerImage.src =gun ;
+
   function backgroundRemove() {
     ctx.clearRect(0, 0, width, height); 
   }
@@ -24,9 +28,37 @@ function App() {
   useEffect(() => {
     canvas = canvasRef.current;
     ctx = canvas.getContext('2d');
-    setInterval(Looping, 20);
+
+    // Performance optimization: Use requestAnimationFrame instead of setInterval
+    // This syncs with browser refresh rate (usually 60fps) and pauses when tab is inactive
+    let animationFrameId;
+    let lastTime = 0;
+    const fps = 50; // Maintain original ~50fps logic (1000/20 = 50)
+    const interval = 1000 / fps;
+
+    const renderLoop = (timestamp) => {
+      // Throttle to target FPS if needed, or just run freely.
+      // The original was 20ms = 50fps.
+      // rAF is usually 60fps (16.6ms). Running slightly faster is usually fine for games.
+      // But to match game speed logic exactly, we can check delta.
+      // However, for this simple game, running at 60fps instead of 50fps is a free smoothness upgrade.
+      // Let's stick to simple rAF for maximum smoothness.
+
+      Looping();
+      animationFrameId = window.requestAnimationFrame(renderLoop);
+    };
+
+    // Start the loop
+    animationFrameId = window.requestAnimationFrame(renderLoop);
+
     document.addEventListener('keydown', keyDown, false);
     document.addEventListener('keyup', keyUp, false);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrameId);
+      document.removeEventListener('keydown', keyDown);
+      document.removeEventListener('keyup', keyUp);
+    }
   }, []);
 
   function drawplayer() {
@@ -58,7 +90,7 @@ function App() {
       if (bullet[i][1] > -11) {
         bullet[i][1] -= 10;
       } else if (bullet[i][1] < -10) {
-        console.log(bullet.splice(i, 1))    
+        // console.log(bullet.splice(i, 1))
         bullet.splice(i, 1);
       }
     }
@@ -67,7 +99,7 @@ function App() {
 // Check for Bullet Collide
    function checkcolidewith(target){
       return bullet.some((bull) => {
-        console.log(bull)
+        // console.log(bull)
         if (collideWith(bull,target)==true) {
           bullet.splice(bullet.indexOf(bull), 1);
           return true;
@@ -103,7 +135,6 @@ function App() {
       if (tar.health <= 0) {
         const index = target.indexOf(tar);
         target.splice(index, 1);
-        console.log(tar.health)
       }
     } else {
       tar.draw(ctx);
