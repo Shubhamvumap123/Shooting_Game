@@ -1,8 +1,11 @@
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders learn react link', () => {
+// Mock HTMLCanvasElement.getContext
+HTMLCanvasElement.prototype.getContext = jest.fn();
+
+test('renders How to Play guide', () => {
   render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
+  const linkElement = screen.getByText(/How to Play/i);
   expect(linkElement).toBeInTheDocument();
 });

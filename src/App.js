@@ -2,7 +2,7 @@
 import './App.css';
 import { useEffect, useRef ,useContext, useState} from 'react';
 import gun from './Target/gun.png';
-import target from './Target/TargetData.';
+import target from './Target/TargetData';
 function App() {
   const [showGuide, setShowGuide] = useState(true);
   const [showWin, setShowWin] = useState(false);
