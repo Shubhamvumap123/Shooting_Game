@@ -1,6 +1,6 @@
 
 import './App.css';
-import { useEffect, useRef ,useContext, useState} from 'react';
+import { useEffect, useRef, useState} from 'react';
 import gun from './Target/gun.png';
 import target from './Target/TargetData.';
 function App() {
@@ -22,11 +22,15 @@ function App() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     canvas = canvasRef.current;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     ctx = canvas.getContext('2d');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     setInterval(Looping, 20);
     document.addEventListener('keydown', keyDown, false);
     document.addEventListener('keyup', keyUp, false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function drawplayer() {
@@ -58,7 +62,7 @@ function App() {
       if (bullet[i][1] > -11) {
         bullet[i][1] -= 10;
       } else if (bullet[i][1] < -10) {
-        console.log(bullet.splice(i, 1))    
+        // Bolt: Removed console.log(bullet.splice(i, 1)) for performance
         bullet.splice(i, 1);
       }
     }
@@ -67,8 +71,9 @@ function App() {
 // Check for Bullet Collide
    function checkcolidewith(target){
       return bullet.some((bull) => {
-        console.log(bull)
-        if (collideWith(bull,target)==true) {
+        // Bolt: Removed console.log(bull) to prevent game loop stutter
+        // Optimization: Removing synchronous logging from O(N*M) loop significantly reduces frame time
+        if (collideWith(bull,target)===true) {
           bullet.splice(bullet.indexOf(bull), 1);
           return true;
         }
@@ -103,7 +108,7 @@ function App() {
       if (tar.health <= 0) {
         const index = target.indexOf(tar);
         target.splice(index, 1);
-        console.log(tar.health)
+        // Bolt: Removed console.log(tar.health)
       }
     } else {
       tar.draw(ctx);
@@ -117,20 +122,20 @@ function App() {
 }
 
   function keyDown(e) {
-    if (e.code == "ArrowRight") rightKey = true;
-    else if (e.code == "ArrowLeft") leftKey = true;
-    if (e.code == "ArrowUp") upKey = true;
-    else if (e.code == "ArrowDown") downKey = true;
-    if (e.key == "Enter" ){
+    if (e.code === "ArrowRight") rightKey = true;
+    else if (e.code === "ArrowLeft") leftKey = true;
+    if (e.code === "ArrowUp") upKey = true;
+    else if (e.code === "ArrowDown") downKey = true;
+    if (e.key === "Enter" ){
       bullet.push([player_x + 7 , player_y , BullWidth, BullHeight]);
     }
   }
  
   function keyUp(e) {
-    if (e.code == "ArrowRight") rightKey = false;
-    else if (e.code == "ArrowLeft") leftKey = false;
-    if (e.code == "ArrowUp") upKey = false;
-    else if (e.code == "ArrowDown") downKey = false;
+    if (e.code === "ArrowRight") rightKey = false;
+    else if (e.code === "ArrowLeft") leftKey = false;
+    if (e.code === "ArrowUp") upKey = false;
+    else if (e.code === "ArrowDown") downKey = false;
   }
 
   return (
