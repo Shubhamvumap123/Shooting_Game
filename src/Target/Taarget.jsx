@@ -37,6 +37,6 @@ export default class Taarget {
 
   takeDamage(damage) {
     this.health -= damage;
-    console.log(this.health);
+    // Bolt: Removed console.log(this.health)
   }
 }
