@@ -54,12 +54,13 @@ function App() {
 
 //Bullet Move 
   function movebullet() {
-    for (var i = 0; i < bullet.length; i++) {
+    // ⚡ Bolt: Iterating backwards prevents skipping elements when splicing
+    // and avoids index recalculation overhead.
+    for (var i = bullet.length - 1; i >= 0; i--) {
       if (bullet[i][1] > -11) {
         bullet[i][1] -= 10;
       } else if (bullet[i][1] < -10) {
-        console.log(bullet.splice(i, 1))    
-        bullet.splice(i, 1);
+        bullet.splice(i, 1); // ⚡ Bolt: Removed expensive console.log
       }
     }
   }
@@ -67,7 +68,6 @@ function App() {
 // Check for Bullet Collide
    function checkcolidewith(target){
       return bullet.some((bull) => {
-        console.log(bull)
         if (collideWith(bull,target)==true) {
           bullet.splice(bullet.indexOf(bull), 1);
           return true;
@@ -103,7 +103,6 @@ function App() {
       if (tar.health <= 0) {
         const index = target.indexOf(tar);
         target.splice(index, 1);
-        console.log(tar.health)
       }
     } else {
       tar.draw(ctx);
