@@ -8,7 +8,7 @@ on top , on hitting the counter of the Boxes Will be Reducing,
 
 ## Demo
 
-GameLink:- https://shooting-game-lyart.vercel.app/
+GameLink:- https://vercel.com/shubham-vijayrao-umaps-projects
 
 ## Tech Stack
 
