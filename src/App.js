@@ -86,7 +86,8 @@ function App() {
 
   // Bullet Move
   function movebullet() {
-    for (var i = 0; i < bullet.length; i++) {
+    // Iterate backwards to safely remove elements without index shifting issues
+    for (var i = bullet.length - 1; i >= 0; i--) {
       if (bullet[i][1] > -11) {
         bullet[i][1] -= 10;
       } else if (bullet[i][1] < -10) {
@@ -95,16 +96,20 @@ function App() {
     }
   }
 
-  // Check for Bullet Collide
-  function checkcolidewith(target) {
-    return bullet.some((bull) => {
-      if (collideWith(bull, target) === true) {
-        bullet.splice(bullet.indexOf(bull), 1);
-        return true;
-      }
-      return false
-    })
-  }
+// Check for Bullet Collide
+   function checkcolidewith(target){
+      return bullet.some((bull) => {
+        if (collideWith(bull,target)===true) {
+          bullet.splice(bullet.indexOf(bull), 1);
+          return true;
+        }
+       return false
+      })
+   }
+
+   //Collide happen conditions
+ function collideWith(Bullet,Enemy) 
+ {  
 
   // Collide happen conditions
   function collideWith(Bullet, Enemy) {
@@ -120,20 +125,17 @@ function App() {
     return false;
   }
 
-  // Loop according to working
-  function Looping() {
-    backgroundRemove();
-    movebullet();
-    drawplayer();
-    drawbullet();
-    target.forEach((tar) => {
-      if (checkcolidewith(tar)) {
-        if (tar.health <= 0) {
-          const index = target.indexOf(tar);
-          target.splice(index, 1);
-        }
-      } else {
-        tar.draw(ctx);
+  //loop according to working
+  function Looping(){     
+  backgroundRemove();
+  movebullet();
+  drawplayer();
+  drawbullet();
+  target.forEach((tar) =>{
+    if (checkcolidewith(tar)) {
+      if (tar.health <= 0) {
+        const index = target.indexOf(tar);
+        target.splice(index, 1);
       }
     });
 
