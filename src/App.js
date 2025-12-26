@@ -129,6 +129,7 @@ function App() {
   drawplayer();
   drawbullet();
   target.forEach((tar) =>{
+    tar.draw(ctx);
     if (checkcolidewith(tar)) {
       if (tar.health <= 0) {
         const index = target.indexOf(tar);
