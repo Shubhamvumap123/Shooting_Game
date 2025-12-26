@@ -107,10 +107,6 @@ function App() {
       })
    }
 
-   //Collide happen conditions
- function collideWith(Bullet,Enemy) 
- {  
-
   // Collide happen conditions
   function collideWith(Bullet, Enemy) {
     if (
@@ -127,15 +123,16 @@ function App() {
 
   //loop according to working
   function Looping(){     
-  backgroundRemove();
-  movebullet();
-  drawplayer();
-  drawbullet();
-  target.forEach((tar) =>{
-    if (checkcolidewith(tar)) {
-      if (tar.health <= 0) {
-        const index = target.indexOf(tar);
-        target.splice(index, 1);
+    backgroundRemove();
+    movebullet();
+    drawplayer();
+    drawbullet();
+    target.forEach((tar) =>{
+      if (checkcolidewith(tar)) {
+        if (tar.health <= 0) {
+          const index = target.indexOf(tar);
+          target.splice(index, 1);
+        }
       }
     });
 
