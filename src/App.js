@@ -107,10 +107,6 @@ function App() {
       })
    }
 
-   //Collide happen conditions
- function collideWith(Bullet,Enemy) 
- {  
-
   // Collide happen conditions
   function collideWith(Bullet, Enemy) {
     if (
@@ -127,15 +123,16 @@ function App() {
 
   //loop according to working
   function Looping(){     
-  backgroundRemove();
-  movebullet();
-  drawplayer();
-  drawbullet();
-  target.forEach((tar) =>{
-    if (checkcolidewith(tar)) {
-      if (tar.health <= 0) {
-        const index = target.indexOf(tar);
-        target.splice(index, 1);
+    backgroundRemove();
+    movebullet();
+    drawplayer();
+    drawbullet();
+    target.forEach((tar) =>{
+      if (checkcolidewith(tar)) {
+        if (tar.health <= 0) {
+          const index = target.indexOf(tar);
+          target.splice(index, 1);
+        }
       }
     });
 
@@ -183,9 +180,9 @@ function App() {
         </canvas>
 
         {showGuide && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60" role="dialog" aria-modal="true" aria-labelledby="guide-title">
             <div className="bg-white rounded-2xl shadow-xl p-6 w-80 md:w-96 text-gray-800 relative">
-              <h2 className="text-xl font-bold mb-2 text-center text-amber-600">How to Play</h2>
+              <h2 id="guide-title" className="text-xl font-bold mb-2 text-center text-amber-600">How to Play</h2>
               <ul className="list-disc pl-5 space-y-2 text-sm md:text-base">
                 <li>Use <span className="font-semibold">Arrow Keys</span> or <span className="font-semibold">WASD</span> to move:
                   <ul className="pl-4 list-[circle]">
@@ -209,13 +206,13 @@ function App() {
             </div>
           </div>)}
         {showWin && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70" role="dialog" aria-modal="true" aria-labelledby="win-title">
             <div className="bg-white rounded-2xl shadow-2xl p-8 flex flex-col items-center animate-bounce">
-              <svg className="w-16 h-16 text-green-500 mb-4 animate-ping" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg aria-hidden="true" className="w-16 h-16 text-green-500 mb-4 animate-ping" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M9 12l2 2 4-4" />
               </svg>
-              <h2 className="text-2xl font-bold text-green-600 mb-2">Congratulations!</h2>
+              <h2 id="win-title" className="text-2xl font-bold text-green-600 mb-2">Congratulations!</h2>
               <p className="text-lg text-gray-700 mb-4">You have killed all enemies!</p>
               <button
                 ref={playAgainButtonRef}
