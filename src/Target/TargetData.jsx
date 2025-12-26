@@ -1,5 +1,5 @@
 
-import Target from "./Taarget";
+import Target from "./Target";
 // const gap = 10; // Removing unused variable
 const target = [
   new Target(50, 5, "DarkBlue", 1),
