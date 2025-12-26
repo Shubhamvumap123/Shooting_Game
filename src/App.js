@@ -29,6 +29,69 @@ function App() {
   let playerImage = new Image();
   playerImage.src = gun;
 
+  // Starfield initialization
+  const stars = useRef([]);
+  if (stars.current.length === 0) {
+    for (let i = 0; i < 50; i++) {
+        // Subtle twinkling stars
+      stars.current.push({
+        x: Math.random() * LOGICAL_WIDTH,
+        y: Math.random() * LOGICAL_HEIGHT,
+        radius: Math.random() * 1.5 + 0.5, 
+        alpha: Math.random(), 
+        maxAlpha: Math.random() * 0.4 + 0.6, 
+        minAlpha: Math.random() * 0.3 + 0.2, 
+        alphaChange: Math.random() * 0.02 + 0.005, 
+        direction: 1,
+        speed: Math.random() * 0.5 + 0.2, // Faster horizontal speed
+        driftSpeed: Math.random() * 0.002 + 0.0005, // Speed of the sine wave drift
+        driftAmplitude: Math.random() * 0.5 // Magnitude of the drift
+      });
+    }
+  }
+
+  function drawStars() {
+    ctx.save();
+    ctx.shadowBlur = 8; // Increased glow
+    ctx.shadowColor = "white";
+
+    stars.current.forEach(star => {
+      ctx.beginPath();
+      // Set color with dynamic alpha
+      ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
+      ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Update alpha for twinkling
+      if (star.direction === 1) {
+          star.alpha += star.alphaChange;
+          if (star.alpha >= star.maxAlpha) {
+              star.alpha = star.maxAlpha;
+              star.direction = -1;
+          }
+      } else {
+          star.alpha -= star.alphaChange;
+          if (star.alpha <= star.minAlpha) {
+              star.alpha = star.minAlpha;
+              star.direction = 1;
+          }
+      }
+
+      // Update position (Movement)
+      // Update position (Movement: Right to Left)
+      star.x -= star.speed;
+      
+      // Undeterministic Drift
+      star.y += Math.sin(Date.now() * star.driftSpeed) * star.driftAmplitude;
+
+      if (star.x < 0) {
+        star.x = LOGICAL_WIDTH;
+        star.y = Math.random() * LOGICAL_HEIGHT;
+      }
+    });
+    ctx.restore();
+  }
+
   function backgroundRemove() {
     ctx.clearRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
   }
@@ -102,7 +165,15 @@ function App() {
     if (player_y <= 0) player_y = 0;
     if ((player_y + player_h) >= LOGICAL_HEIGHT) player_y = LOGICAL_HEIGHT - player_h;
 
+    if ((player_y + player_h) >= LOGICAL_HEIGHT) player_y = LOGICAL_HEIGHT - player_h;
+
+    ctx.save();
+    ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
+    ctx.shadowBlur = 4;
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
     ctx.drawImage(playerImage, player_x, player_y, player_w, player_h);
+    ctx.restore();
   }
 
   // Bullet Create
@@ -114,7 +185,13 @@ function App() {
       for (var i = 0; i < bullet.length; i++) {
         // Draw bullet image instead of rectangle
         // Adjust width/height for the sprite
+        ctx.save();
+        ctx.shadowColor = "rgba(255, 255, 0, 0.5)"; // Slight glow for bullets
+        ctx.shadowBlur = 2;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
         ctx.drawImage(bulletSprite, bullet[i][0], bullet[i][1], 10, 20); 
+        ctx.restore(); 
       }
   }
 
@@ -159,6 +236,7 @@ function App() {
   //loop according to working
   function Looping(){     
   backgroundRemove();
+  drawStars();
   movebullet();
   drawplayer();
   drawbullet();

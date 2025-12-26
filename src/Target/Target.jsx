@@ -1,4 +1,3 @@
-import images from './target.png';
 import duckImg from '../assets/hd_duck.png';
 
 export default class Target {
@@ -20,7 +19,13 @@ export default class Target {
 
   draw(ctx) {
     // Draw the image 
+    ctx.save();
+    ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
+    ctx.shadowBlur = 4;
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
     ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+    ctx.restore();
 
     // Draw the border
     ctx.strokeStyle = "transparent";
