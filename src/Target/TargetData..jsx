@@ -1,6 +1,6 @@
 
 import Target from "./Taarget";
-const gap = 10;
+// const gap = 10; // Removing unused variable
 const target = [
   new Target(50, 5, "DarkBlue", 1),
   new Target(100, 5, "DarkBlue", 2),
