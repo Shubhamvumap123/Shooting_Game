@@ -31,6 +31,9 @@ function App() {
 
   // Starfield initialization
   const stars = useRef([]);
+  // Explosions initialization
+  const explosions = useRef([]);
+
   if (stars.current.length === 0) {
     for (let i = 0; i < 50; i++) {
         // Subtle twinkling stars
@@ -91,6 +94,28 @@ function App() {
     });
     ctx.restore();
   }
+
+  function drawExplosions() {
+    ctx.save();
+    explosions.current.forEach((exp, index) => {
+        ctx.beginPath();
+        ctx.arc(exp.x, exp.y, exp.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(0, 255, 0, ${exp.alpha})`; // Neon Green
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = "lime";
+        ctx.fill();
+
+        // Animate
+        exp.radius += 2; // Expand
+        exp.alpha -= 0.05; // Fade out
+
+        // Remove if faded
+        if (exp.alpha <= 0) {
+            explosions.current.splice(index, 1);
+        }
+    });
+    ctx.restore();
+  } 
 
   function backgroundRemove() {
     ctx.clearRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
@@ -269,6 +294,7 @@ function App() {
   function Looping(){     
   backgroundRemove();
   drawStars();
+  drawExplosions();
   movebullet();
   drawplayer();
   drawbullet();
@@ -276,6 +302,14 @@ function App() {
     tar.draw(ctx);
     if (checkcolidewith(tar)) {
       if (tar.health <= 0) {
+        // Trigger Explosion
+        explosions.current.push({
+            x: tar.x + tar.width / 2,
+            y: tar.y + tar.height / 2,
+            radius: 10,
+            alpha: 1
+        });
+
         const index = target.indexOf(tar);
         target.splice(index, 1);
       }
