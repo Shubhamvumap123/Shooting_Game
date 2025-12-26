@@ -153,6 +153,33 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  function drawThruster(x, y, width, height) {
+    ctx.save();
+    
+    // Gradient for the flame
+    const gradient = ctx.createLinearGradient(x, y, x, y + height);
+    gradient.addColorStop(0, "cyan");    // Core heat
+    gradient.addColorStop(0.4, "blue");  // Middle
+    gradient.addColorStop(1, "rgba(0, 0, 255, 0)"); // Fade out tail
+
+    // Randomize flame length and width for flickering effect
+    const flickerHeight = height + Math.random() * 3;
+    const flickerWidth = width + Math.random() * 2 - 1;
+
+    ctx.fillStyle = gradient;
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = "cyan";
+
+    ctx.beginPath();
+    ctx.moveTo(x - flickerWidth / 2, y); // Top left
+    ctx.lineTo(x + flickerWidth / 2, y); // Top right
+    ctx.lineTo(x, y + flickerHeight);    // Bottom tip
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.restore();
+  }
+
   function drawplayer() {
     if (rightKey) player_x += 3;
     else if (leftKey) player_x -= 3;
@@ -166,6 +193,11 @@ function App() {
     if ((player_y + player_h) >= LOGICAL_HEIGHT) player_y = LOGICAL_HEIGHT - player_h;
 
     if ((player_y + player_h) >= LOGICAL_HEIGHT) player_y = LOGICAL_HEIGHT - player_h;
+
+    // Draw thruster at the bottom center of the ship
+    // Passing x (center), y (bottom), width, height of flames
+    // Overlap slightly (-5) to look attached
+    drawThruster(player_x + player_w / 2, player_y + player_h - 5, 6, 25);
 
     ctx.save();
     ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
