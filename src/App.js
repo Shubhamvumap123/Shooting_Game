@@ -1,7 +1,7 @@
 import './App.css';
 import { useEffect, useRef, useState } from 'react';
 import gun from './Target/gun.png';
-import target from './Target/TargetData.';
+import target from './Target/TargetData';
 
 function App() {
   const [showGuide, setShowGuide] = useState(true);
@@ -108,9 +108,6 @@ function App() {
    }
 
    //Collide happen conditions
- function collideWith(Bullet,Enemy) 
- {  
-
   // Collide happen conditions
   function collideWith(Bullet, Enemy) {
     if (
@@ -137,7 +134,8 @@ function App() {
         const index = target.indexOf(tar);
         target.splice(index, 1);
       }
-    });
+    }
+  });
 
     // Show win animation if all targets are killed
     if (target.length === 0 && !showWin) {

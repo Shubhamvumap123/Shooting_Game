@@ -1,41 +1,54 @@
-
-
 # Shooter Game
 
-This Game is a Shooting game which is killing enemy by using keybord key
-A shooting Bullet Game where User will shoot the bullets on the numbers box available
-on top , on hitting the counter of the Boxes Will be Reducing,
+A shooting game where you control a gun to eliminate enemy targets by shooting bullets. Hit the numbered boxes to reduce their health and clear the level.
 
 ## Demo
 
-GameLink:- https://shooting-game-lyart.vercel.app/
+**Play Now:** [https://shooting-game-lyart.vercel.app/](https://shooting-game-lyart.vercel.app/)
 
 ## Tech Stack
 
-**Client:** React, Javascript, Tailwind CSS
-
-**Front-end Deployment:** Vercel
+- **Client:** React, Javascript, Tailwind CSS
+- **Deployment:** Vercel
 
 ## Features
 
-- Gun will move after click on keybard arrow key 
-- If we click on left key it will move left , if we click right click it will move right , likewise all four arrow key are use to move Gun
-- After click on "Enter" button it will shoot bullet
-- When bullet and target collide with each other then power of target will decreases
-- If target power becomming zero then it will invisible
+- **Movement:** Move the gun using **Arrow keys** or **WASD**.
+- **Shooting:** Press **Enter** or **Space** to fire bullets.
+- **Mechanics:** Bullets reduce the target's health. When health reaches zero, the target disappears. Kill all targets to win!
 
-## Screenshots / Images
+## Build Locally
 
-- Landing Page
+To run this project locally, you need [Node.js](https://nodejs.org/) and [pnpm](https://pnpm.io/) installed.
 
-![Screenshot (46)](https://user-images.githubusercontent.com/94427228/211980834-c7f2ca8c-125d-4798-ad89-cb40fc1f7513.png)
-![Screenshot (43)](https://user-images.githubusercontent.com/94427228/211980901-92077e4b-99b9-4d62-8f55-3905127f72ca.png)
+1. **Clone the repository** (if you haven't already).
+2. **Install dependencies:**
+   ```bash
+   pnpm install
+   ```
+3. **Run the development server:**
+   ```bash
+   pnpm start
+   ```
+4. **Build for production:**
+   ```bash
+   pnpm build
+   ```
+
+## Screenshots
+
+**Landing Page**
+
+![Landing Page](https://user-images.githubusercontent.com/94427228/211980834-c7f2ca8c-125d-4798-ad89-cb40fc1f7513.png)
+
+**Gameplay**
+
+![Gameplay](https://user-images.githubusercontent.com/94427228/211980901-92077e4b-99b9-4d62-8f55-3905127f72ca.png)
 
 ## Owner
 
 - [@Shubham V. Umap](https://github.com/Shubhamvumap123)
 
+## Notes
 
-## End Notes
-
-On Some Browser it will working like vibrating at that time you need refresh it.
+- If you experience visual jittering on some browsers, try refreshing the page.
