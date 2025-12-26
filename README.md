@@ -35,6 +35,16 @@ To run this project locally, you need [Node.js](https://nodejs.org/) and [pnpm](
    pnpm build
    ```
 
+## Testing
+
+This project uses [Playwright](https://playwright.dev/) for end-to-end integration testing.
+
+To run the tests:
+
+```bash
+pnpm test:e2e
+```
+
 ## Screenshots
 
 **Landing Page**
