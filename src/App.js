@@ -110,9 +110,6 @@ function App() {
    //Collide happen conditions
  function collideWith(Bullet,Enemy) 
  {  
-
-  // Collide happen conditions
-  function collideWith(Bullet, Enemy) {
     if (
       Bullet[0] < Enemy.x + Enemy.width &&
       Bullet[0] + BullWidth > Enemy.x &&
@@ -131,13 +128,15 @@ function App() {
   movebullet();
   drawplayer();
   drawbullet();
-  target.forEach((tar) =>{
+  // Iterate backwards to safe remove elements
+  for (let i = target.length - 1; i >= 0; i--) {
+    const tar = target[i];
     if (checkcolidewith(tar)) {
       if (tar.health <= 0) {
-        const index = target.indexOf(tar);
-        target.splice(index, 1);
+        target.splice(i, 1);
       }
-    });
+    }
+  }
 
     // Show win animation if all targets are killed
     if (target.length === 0 && !showWin) {
