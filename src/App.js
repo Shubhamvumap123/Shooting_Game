@@ -2,6 +2,8 @@ import './App.css';
 import { useEffect, useRef, useState } from 'react';
 import gun from './Target/gun.png';
 import target from './Target/TargetData';
+import spaceBg from './assets/space_bg.png';
+import bulletImg from './assets/hd_bullet.png';
 
 function App() {
   const [showGuide, setShowGuide] = useState(true);
@@ -13,12 +15,14 @@ function App() {
   const startButtonRef = useRef(null);
   const playAgainButtonRef = useRef(null);
 
+  // Game logical size
+  const LOGICAL_WIDTH = 300;
+  const LOGICAL_HEIGHT = 150;
+
   // Game variables (closed over by Looping and event handlers)
   let canvas, ctx,
     damage = 1,
-    width = 300,
-    height = 150,
-    player_x = (width / 2) - 25, player_y = height - 25, player_w = 20, player_h = 20;
+    player_x = (LOGICAL_WIDTH / 2) - 25, player_y = LOGICAL_HEIGHT - 25, player_w = 20, player_h = 20;
   let bullet = [], rightKey = false, leftKey = false, upKey = false, downKey = false;
   let BullWidth = 3;
   let BullHeight = 7;
@@ -26,7 +30,7 @@ function App() {
   playerImage.src = gun;
 
   function backgroundRemove() {
-    ctx.clearRect(0, 0, width, height);
+    ctx.clearRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
   }
 
   // Focus management effects
@@ -47,6 +51,31 @@ function App() {
     canvas = canvasRef.current;
     // eslint-disable-next-line react-hooks/exhaustive-deps
     ctx = canvas.getContext('2d');
+
+    const handleResize = () => {
+      if (!canvas) return;
+      
+      // Get the display size of the canvas
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      
+      // Set the buffer size to the display size multiplied by DPR for sharp rendering
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      
+      // Scale all drawing operations by the ratio of actual pixels to logical pixels
+      const scaleX = canvas.width / LOGICAL_WIDTH;
+      const scaleY = canvas.height / LOGICAL_HEIGHT;
+      
+      ctx.scale(scaleX, scaleY);
+    };
+
+    // Initial sizing
+    handleResize();
+
+    // Re-size on window resize
+    window.addEventListener('resize', handleResize);
+
     const intervalId = setInterval(Looping, 20); // Capture ID
     document.addEventListener('keydown', keyDown, false);
     document.addEventListener('keyup', keyUp, false);
@@ -56,6 +85,7 @@ function App() {
       clearInterval(intervalId);
       document.removeEventListener('keydown', keyDown);
       document.removeEventListener('keyup', keyUp);
+      window.removeEventListener('resize', handleResize);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -68,19 +98,23 @@ function App() {
 
     // Boundaries
     if (player_x <= 0) player_x = 0;
-    if ((player_x + player_w) >= width) player_x = width - player_w;
+    if ((player_x + player_w) >= LOGICAL_WIDTH) player_x = LOGICAL_WIDTH - player_w;
     if (player_y <= 0) player_y = 0;
-    if ((player_y + player_h) >= height) player_y = height - player_h;
+    if ((player_y + player_h) >= LOGICAL_HEIGHT) player_y = LOGICAL_HEIGHT - player_h;
 
     ctx.drawImage(playerImage, player_x, player_y, player_w, player_h);
   }
 
   // Bullet Create
+  const bulletSprite = new Image();
+  bulletSprite.src = bulletImg;
+
   function drawbullet() {
     if (bullet.length)
       for (var i = 0; i < bullet.length; i++) {
-        ctx.fillStyle = 'FireBrick';
-        ctx.fillRect(bullet[i][0], bullet[i][1], bullet[i][2], bullet[i][3])
+        // Draw bullet image instead of rectangle
+        // Adjust width/height for the sprite
+        ctx.drawImage(bulletSprite, bullet[i][0], bullet[i][1], 10, 20); 
       }
   }
 
@@ -177,7 +211,7 @@ function App() {
           backgroundRepeat: "no-repeat",
           backgroundSize: "cover",
           backgroundPosition: "center",
-          backgroundImage: "url(/Image/Anime.gif)",
+          backgroundImage: `url(${spaceBg})`,
         }} ref={canvasRef} >
         </canvas>
 

@@ -1,17 +1,18 @@
 import images from './target.png';
+import duckImg from '../assets/hd_duck.png';
 
-export default class Taarget {
-    
-  constructor(x_axis, y_axis, color, health) {
-    this.x = x_axis;
-    this.y = y_axis;
+export default class Target {
+
+  constructor(x, y, color, health) {
+    this.x = x;
+    this.y = y;
     this.color = color;
     this.health = health;
-    this.width = 30;
-    this.height = 40;
+    const scale = 0.06;
+    this.width = 438 * scale;
+    this.height = 569 * scale;
     this.image = new Image();
-
-    this.image.src = images; // Replace with the actual path to your image
+    this.image.src = duckImg; // Replace with the actual path to your image
     this.image.onload = () => {
       this.imageLoaded = true;
     };
