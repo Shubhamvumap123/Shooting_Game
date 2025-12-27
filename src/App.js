@@ -266,9 +266,10 @@ function App() {
 
 // Check for Bullet Collide
    function checkcolidewith(target){
-      return bullet.some((bull) => {
+      return bullet.some((bull, index) => {
         if (collideWith(bull,target)===true) {
-          bullet.splice(bullet.indexOf(bull), 1);
+          // Optimize: Use index provided by some() instead of indexOf()
+          bullet.splice(index, 1);
           return true;
         }
        return false
@@ -298,7 +299,9 @@ function App() {
   movebullet();
   drawplayer();
   drawbullet();
-  target.forEach((tar) =>{
+  // Optimize: Iterate backwards to safely remove elements without index shifting issues
+  for (let i = target.length - 1; i >= 0; i--) {
+    const tar = target[i];
     tar.draw(ctx);
     if (checkcolidewith(tar)) {
       if (tar.health <= 0) {
@@ -310,11 +313,10 @@ function App() {
             alpha: 1
         });
 
-        const index = target.indexOf(tar);
-        target.splice(index, 1);
+        target.splice(i, 1);
       }
     }
-  });
+  }
 
     // Show win animation if all targets are killed
     if (target.length === 0 && !showWin) {
