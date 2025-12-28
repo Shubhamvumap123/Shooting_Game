@@ -155,7 +155,7 @@ function App() {
       const scaleX = canvas.width / LOGICAL_WIDTH;
       const scaleY = canvas.height / LOGICAL_HEIGHT;
       
-      ctx.scale(scaleX, scaleY);
+      if (ctx) ctx.scale(scaleX, scaleY);
     };
 
     // Initial sizing
@@ -266,13 +266,13 @@ function App() {
 
 // Check for Bullet Collide
    function checkcolidewith(target){
-      return bullet.some((bull) => {
-        if (collideWith(bull,target)===true) {
-          bullet.splice(bullet.indexOf(bull), 1);
+      for (let i = 0; i < bullet.length; i++) {
+        if (collideWith(bullet[i], target)) {
+          bullet.splice(i, 1);
           return true;
         }
-       return false
-      })
+      }
+      return false;
    }
 
    //Collide happen conditions
@@ -298,7 +298,10 @@ function App() {
   movebullet();
   drawplayer();
   drawbullet();
-  target.forEach((tar) =>{
+
+  // Iterate backwards to prevent skipped elements when splicing
+  for (let i = target.length - 1; i >= 0; i--) {
+    const tar = target[i];
     tar.draw(ctx);
     if (checkcolidewith(tar)) {
       if (tar.health <= 0) {
@@ -310,11 +313,10 @@ function App() {
             alpha: 1
         });
 
-        const index = target.indexOf(tar);
-        target.splice(index, 1);
+        target.splice(i, 1);
       }
     }
-  });
+  }
 
     // Show win animation if all targets are killed
     if (target.length === 0 && !showWin) {
