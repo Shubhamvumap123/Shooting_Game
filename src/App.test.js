@@ -1,14 +1,42 @@
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-// Mock canvas getContext
-HTMLCanvasElement.prototype.getContext = jest.fn(() => {
-  return {
-    clearRect: jest.fn(),
-    drawImage: jest.fn(),
-    fillStyle: '',
-    fillRect: jest.fn(),
-  };
+const mockContext = {
+  clearRect: jest.fn(),
+  drawImage: jest.fn(),
+  fillRect: jest.fn(),
+  strokeRect: jest.fn(),
+  fillText: jest.fn(),
+  save: jest.fn(),
+  restore: jest.fn(),
+  beginPath: jest.fn(),
+  moveTo: jest.fn(),
+  lineTo: jest.fn(),
+  closePath: jest.fn(),
+  fill: jest.fn(),
+  arc: jest.fn(),
+  scale: jest.fn(),
+  createLinearGradient: jest.fn(() => ({
+    addColorStop: jest.fn(),
+  })),
+};
+
+beforeAll(() => {
+  // Mock getContext
+  jest.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(() => mockContext);
+
+  // Mock getBoundingClientRect
+  Object.defineProperty(HTMLCanvasElement.prototype, 'getBoundingClientRect', {
+    writable: true,
+    value: () => ({
+      width: 300,
+      height: 150,
+      top: 0,
+      left: 0,
+      bottom: 150,
+      right: 300,
+    }),
+  });
 });
 
 test('renders Start Game button', () => {
@@ -21,20 +49,4 @@ test('renders How to Play guide initially', () => {
   render(<App />);
   const guideTitle = screen.getByText(/How to Play/i);
   expect(guideTitle).toBeInTheDocument();
-// Mock HTMLCanvasElement.getContext
-beforeAll(() => {
-  HTMLCanvasElement.prototype.getContext = jest.fn(() => ({
-    clearRect: jest.fn(),
-    drawImage: jest.fn(),
-    fillRect: jest.fn(),
-    strokeRect: jest.fn(),
-    fillText: jest.fn(),
-    // Add other methods used in your app
-  }));
-});
-
-test('renders learn react link', () => {
-  render(<App />);
-  const linkElement = screen.getByText(/How to Play/i);
-  expect(linkElement).toBeInTheDocument();
 });
