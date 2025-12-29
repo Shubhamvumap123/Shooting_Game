@@ -155,7 +155,7 @@ function App() {
       const scaleX = canvas.width / LOGICAL_WIDTH;
       const scaleY = canvas.height / LOGICAL_HEIGHT;
       
-      ctx.scale(scaleX, scaleY);
+      if (ctx) ctx.scale(scaleX, scaleY);
     };
 
     // Initial sizing
@@ -298,7 +298,9 @@ function App() {
   movebullet();
   drawplayer();
   drawbullet();
-  target.forEach((tar) =>{
+  // Iterate backwards to allow safe removal without index shifting issues
+  for (let i = target.length - 1; i >= 0; i--) {
+    const tar = target[i];
     tar.draw(ctx);
     if (checkcolidewith(tar)) {
       if (tar.health <= 0) {
@@ -310,11 +312,12 @@ function App() {
             alpha: 1
         });
 
-        const index = target.indexOf(tar);
-        target.splice(index, 1);
+        // Optimization: Use known index instead of searching with indexOf
+        // and backwards iteration prevents skipping elements after splice
+        target.splice(i, 1);
       }
     }
-  });
+  }
 
     // Show win animation if all targets are killed
     if (target.length === 0 && !showWin) {
