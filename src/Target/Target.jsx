@@ -43,6 +43,5 @@ export default class Target {
 
   takeDamage(damage) {
     this.health -= damage;
-    console.log(this.health);
   }
 }
