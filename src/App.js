@@ -97,23 +97,24 @@ function App() {
 
   function drawExplosions() {
     ctx.save();
-    explosions.current.forEach((exp, index) => {
-        ctx.beginPath();
-        ctx.arc(exp.x, exp.y, exp.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(0, 255, 0, ${exp.alpha})`; // Neon Green
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = "lime";
-        ctx.fill();
+    for (let i = explosions.current.length - 1; i >= 0; i--) {
+      const exp = explosions.current[i];
+      ctx.beginPath();
+      ctx.arc(exp.x, exp.y, exp.radius, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(0, 255, 0, ${exp.alpha})`; // Neon Green
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = "lime";
+      ctx.fill();
 
-        // Animate
-        exp.radius += 2; // Expand
-        exp.alpha -= 0.05; // Fade out
+      // Animate
+      exp.radius += 2; // Expand
+      exp.alpha -= 0.05; // Fade out
 
-        // Remove if faded
-        if (exp.alpha <= 0) {
-            explosions.current.splice(index, 1);
-        }
-    });
+      // Remove if faded
+      if (exp.alpha <= 0) {
+        explosions.current.splice(i, 1);
+      }
+    }
     ctx.restore();
   } 
 
@@ -148,14 +149,18 @@ function App() {
       const dpr = window.devicePixelRatio || 1;
       
       // Set the buffer size to the display size multiplied by DPR for sharp rendering
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
+      if (rect) {
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+      }
       
       // Scale all drawing operations by the ratio of actual pixels to logical pixels
       const scaleX = canvas.width / LOGICAL_WIDTH;
       const scaleY = canvas.height / LOGICAL_HEIGHT;
       
-      ctx.scale(scaleX, scaleY);
+      if (ctx) {
+        ctx.scale(scaleX, scaleY);
+      }
     };
 
     // Initial sizing
@@ -238,18 +243,21 @@ function App() {
   bulletSprite.src = bulletImg;
 
   function drawbullet() {
-    if (bullet.length)
+    if (bullet.length) {
+      // Optimize: Set context state once for all bullets
+      ctx.save();
+      ctx.shadowColor = "rgba(255, 255, 0, 0.5)"; // Slight glow for bullets
+      ctx.shadowBlur = 2;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+
       for (var i = 0; i < bullet.length; i++) {
         // Draw bullet image instead of rectangle
         // Adjust width/height for the sprite
-        ctx.save();
-        ctx.shadowColor = "rgba(255, 255, 0, 0.5)"; // Slight glow for bullets
-        ctx.shadowBlur = 2;
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 0;
         ctx.drawImage(bulletSprite, bullet[i][0], bullet[i][1], 10, 20); 
-        ctx.restore(); 
       }
+      ctx.restore();
+    }
   }
 
   // Bullet Move
@@ -266,9 +274,10 @@ function App() {
 
 // Check for Bullet Collide
    function checkcolidewith(target){
-      return bullet.some((bull) => {
+      return bullet.some((bull, index) => {
         if (collideWith(bull,target)===true) {
-          bullet.splice(bullet.indexOf(bull), 1);
+          // Use index from some() callback to avoid indexOf scan
+          bullet.splice(index, 1);
           return true;
         }
        return false
@@ -298,8 +307,15 @@ function App() {
   movebullet();
   drawplayer();
   drawbullet();
-  target.forEach((tar) =>{
+
+  // Iterate backwards to allow safe removal
+  for (let i = target.length - 1; i >= 0; i--) {
+    const tar = target[i];
     tar.draw(ctx);
+
+    // Check collision
+    // Optimize: checkcolidewith uses .some() which stops at first match.
+    // We can also pass the target index if needed, but the current logic works.
     if (checkcolidewith(tar)) {
       if (tar.health <= 0) {
         // Trigger Explosion
@@ -310,11 +326,11 @@ function App() {
             alpha: 1
         });
 
-        const index = target.indexOf(tar);
-        target.splice(index, 1);
+        // Remove target using the current loop index
+        target.splice(i, 1);
       }
     }
-  });
+  }
 
     // Show win animation if all targets are killed
     if (target.length === 0 && !showWin) {
