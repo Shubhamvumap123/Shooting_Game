@@ -22,8 +22,13 @@ function App() {
   // Game variables (closed over by Looping and event handlers)
   let canvas, ctx,
     damage = 1,
-    player_x = (LOGICAL_WIDTH / 2) - 25, player_y = LOGICAL_HEIGHT - 25, player_w = 20, player_h = 20;
-  let bullet = [], rightKey = false, leftKey = false, upKey = false, downKey = false;
+    player_x = (LOGICAL_WIDTH / 2) - 25, player_y = LOGICAL_HEIGHT - 25, player_w = 20, player_h = 20,
+    player_angle = 0; // Rotational angle in radians
+
+  let bullet = [], // Now stores objects: {x, y, vx, vy, angle}
+      rightKey = false, leftKey = false, upKey = false, downKey = false,
+      qKey = false, eKey = false; // Rotation keys
+
   let BullWidth = 3;
   let BullHeight = 7;
   let playerImage = new Image();
@@ -180,8 +185,6 @@ function App() {
   }, []);
 
   function drawThruster(x, y, width, height) {
-    ctx.save();
-    
     // Gradient for the flame
     const gradient = ctx.createLinearGradient(x, y, x, y + height);
     gradient.addColorStop(0, "cyan");    // Core heat
@@ -202,15 +205,30 @@ function App() {
     ctx.lineTo(x, y + flickerHeight);    // Bottom tip
     ctx.closePath();
     ctx.fill();
-
-    ctx.restore();
   }
 
   function drawplayer() {
-    if (rightKey) player_x += 3;
-    else if (leftKey) player_x -= 3;
-    if (upKey) player_y -= 3;
-    else if (downKey) player_y += 3;
+    let moveX = 0;
+    let moveY = 0;
+
+    if (rightKey) moveX = 1;
+    else if (leftKey) moveX = -1;
+    if (upKey) moveY = -1;
+    else if (downKey) moveY = 1;
+
+    // Rotation Logic
+    if (qKey) player_angle -= 0.07; // Rotate Left
+    if (eKey) player_angle += 0.07; // Rotate Right
+
+    // Normalize speed for diagonal movement
+    if (moveX !== 0 && moveY !== 0) {
+        const factor = 1 / Math.sqrt(2);
+        moveX *= factor;
+        moveY *= factor;
+    }
+
+    player_x += moveX * 3;
+    player_y += moveY * 3;
 
     // Boundaries
     if (player_x <= 0) player_x = 0;
@@ -218,19 +236,26 @@ function App() {
     if (player_y <= 0) player_y = 0;
     if ((player_y + player_h) >= LOGICAL_HEIGHT) player_y = LOGICAL_HEIGHT - player_h;
 
-    if ((player_y + player_h) >= LOGICAL_HEIGHT) player_y = LOGICAL_HEIGHT - player_h;
-
-    // Draw thruster at the bottom center of the ship
-    // Passing x (center), y (bottom), width, height of flames
-    // Overlap slightly (-5) to look attached
-    drawThruster(player_x + player_w / 2, player_y + player_h - 5, 6, 25);
-
+    // Save context for rotation
     ctx.save();
+    
+    // Move pivot to center of player
+    const centerX = player_x + player_w / 2;
+    const centerY = player_y + player_h / 2;
+    
+    ctx.translate(centerX, centerY);
+    ctx.rotate(player_angle);
+    ctx.translate(-centerX, -centerY);
+
+    // Draw thruster at the bottom center of the ship (relative to rotation)
+    drawThruster(centerX, player_y + player_h - 5, 6, 25);
+
     ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
     ctx.shadowBlur = 4;
     ctx.shadowOffsetX = 2;
     ctx.shadowOffsetY = 2;
     ctx.drawImage(playerImage, player_x, player_y, player_w, player_h);
+    
     ctx.restore();
   }
 
@@ -241,14 +266,24 @@ function App() {
   function drawbullet() {
     if (bullet.length)
       for (var i = 0; i < bullet.length; i++) {
-        // Draw bullet image instead of rectangle
-        // Adjust width/height for the sprite
+        const b = bullet[i];
+        
         ctx.save();
+        
+        // Translate to bullet position for rotation
+        const bCenterX = b.x + 5; // Half width (10/2)
+        const bCenterY = b.y + 10; // Half height (20/2)
+        
+        ctx.translate(bCenterX, bCenterY);
+        ctx.rotate(b.angle);
+        ctx.translate(-bCenterX, -bCenterY);
+
         ctx.shadowColor = "rgba(255, 255, 0, 0.5)"; // Slight glow for bullets
         ctx.shadowBlur = 2;
         ctx.shadowOffsetX = 0;
         ctx.shadowOffsetY = 0;
-        ctx.drawImage(bulletSprite, bullet[i][0], bullet[i][1], 10, 20); 
+        
+        ctx.drawImage(bulletSprite, b.x, b.y, 10, 20); 
         ctx.restore(); 
       }
   }
@@ -257,11 +292,15 @@ function App() {
   function movebullet() {
     // Iterate backwards to safely remove elements without index shifting issues
     for (var i = bullet.length - 1; i >= 0; i--) {
-      if (bullet[i][1] > -11) {
-        bullet[i][1] -= 10;
-      } else if (bullet[i][1] < -10) {
-        bullet.splice(i, 1);
-      }
+        const b = bullet[i];
+        
+        b.x += b.vx;
+        b.y += b.vy;
+
+        // Boundary check (extended slightly to ensure full exit)
+        if (b.x < -20 || b.x > LOGICAL_WIDTH + 20 || b.y < -20 || b.y > LOGICAL_HEIGHT + 20) {
+            bullet.splice(i, 1);
+        }
     }
   }
 
@@ -280,10 +319,10 @@ function App() {
   // Collide happen conditions
   function collideWith(Bullet, Enemy) {
     if (
-      Bullet[0] < Enemy.x + Enemy.width &&
-      Bullet[0] + BullWidth > Enemy.x &&
-      Bullet[1] < Enemy.y + Enemy.height &&
-      Bullet[1] + BullHeight > Enemy.y
+      Bullet.x < Enemy.x + Enemy.width &&
+      Bullet.x + 10 > Enemy.x && // Bullet width is ~10
+      Bullet.y < Enemy.y + Enemy.height &&
+      Bullet.y + 20 > Enemy.y   // Bullet height is ~20
     ) {
       Enemy.takeDamage(damage);
       return true
@@ -300,7 +339,7 @@ function App() {
   drawplayer();
   drawbullet();
   target.forEach((tar) =>{
-    tar.update(LOGICAL_WIDTH);
+    tar.update(LOGICAL_WIDTH, LOGICAL_HEIGHT);
     tar.draw(ctx);
     if (checkcolidewith(tar)) {
       if (tar.health <= 0) {
@@ -326,6 +365,21 @@ function App() {
       setShowWin(true);
       isGameActive.current = false; // Stop input on win
     }
+    
+    // Party Animation (Fireworks on win)
+    if (showWin) {
+        if (Math.random() < 0.1) { // 10% chance per frame to spawn firework
+            explosions.current.push({
+                x: Math.random() * LOGICAL_WIDTH,
+                y: Math.random() * LOGICAL_HEIGHT,
+                radius: 5, 
+                alpha: 1, 
+                color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+                expandRate: Math.random() * 2 + 1,
+                fadeRate: Math.random() * 0.05 + 0.02
+            });
+        }
+    }
   }
 
   function keyDown(e) {
@@ -335,9 +389,31 @@ function App() {
     else if (e.code === "ArrowLeft" || e.code === "KeyA") leftKey = true;
     if (e.code === "ArrowUp" || e.code === "KeyW") upKey = true;
     else if (e.code === "ArrowDown" || e.code === "KeyS") downKey = true;
+    if (e.code === "KeyQ") qKey = true;
+    if (e.code === "KeyE") eKey = true;
 
     if (e.key === "Enter" || e.code === "Space") {
-      bullet.push([player_x + 7, player_y, BullWidth, BullHeight]);
+        // Calculate nose position relative to center
+        const centerX = player_x + player_w / 2;
+        const centerY = player_y + player_h / 2;
+        const speed = 10;
+        
+        // Bullet vector based on player angle
+        // Subtract Math.PI / 2 because 0 degrees is usually "Right" in trig, but our ship points "Up" visually? 
+        // Or if angle 0 is up, then:
+        // x component: sin(angle)
+        // y component: -cos(angle)
+        
+        const vx = Math.sin(player_angle) * speed;
+        const vy = -Math.cos(player_angle) * speed;
+        
+        bullet.push({
+            x: centerX - 5, // Center bullet width
+            y: centerY - 10,
+            vx: vx,
+            vy: vy,
+            angle: player_angle
+        });
     }
   }
 
@@ -346,6 +422,8 @@ function App() {
     else if (e.code === "ArrowLeft" || e.code === "KeyA") leftKey = false;
     if (e.code === "ArrowUp" || e.code === "KeyW") upKey = false;
     else if (e.code === "ArrowDown" || e.code === "KeyS") downKey = false;
+    if (e.code === "KeyQ") qKey = false;
+    if (e.code === "KeyE") eKey = false;
   }
 
   const startGame = () => {
@@ -375,6 +453,7 @@ function App() {
                     <li><span className="text-amber-500">S / Down</span> : Move Down</li>
                     <li><span className="text-amber-500">A / Left</span> : Move Left</li>
                     <li><span className="text-amber-500">D / Right</span> : Move Right</li>
+                    <li><span className="text-amber-500">Q / E</span> : Rotate Ship</li>
                   </ul>
                 </li>
                 <li className="mt-2">Press <span className="font-semibold text-white">Enter / Space</span> to Fire.</li>

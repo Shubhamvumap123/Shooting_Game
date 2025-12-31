@@ -18,14 +18,21 @@ export default class Target {
     
     // Movement properties
     this.dx = (Math.random() * 0.5 + 0.2) * (Math.random() < 0.5 ? 1 : -1); 
+    this.dy = (Math.random() * 0.5 + 0.2) * (Math.random() < 0.5 ? 1 : -1);
   }
 
-  update(logicalWidth) {
+  update(logicalWidth, logicalHeight) {
     this.x += this.dx;
+    this.y += this.dy;
 
-    // Bounce off walls
+    // Bounce off walls (Horizontal)
     if (this.x <= 0 || this.x + this.width >= logicalWidth) {
       this.dx *= -1;
+    }
+
+    // Bounce off walls (Vertical)
+    if (this.y <= 0 || this.y + this.height >= logicalHeight && this.dy > 0) {
+        this.dy *= -1;
     }
   }
 
