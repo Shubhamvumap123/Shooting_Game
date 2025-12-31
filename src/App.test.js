@@ -1,14 +1,47 @@
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-// Mock canvas getContext
-HTMLCanvasElement.prototype.getContext = jest.fn(() => {
-  return {
-    clearRect: jest.fn(),
-    drawImage: jest.fn(),
-    fillStyle: '',
-    fillRect: jest.fn(),
-  };
+beforeAll(() => {
+  // Mock getContext
+  Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
+    writable: true,
+    value: jest.fn(() => ({
+      save: jest.fn(),
+      restore: jest.fn(),
+      beginPath: jest.fn(),
+      moveTo: jest.fn(),
+      lineTo: jest.fn(),
+      closePath: jest.fn(),
+      fill: jest.fn(),
+      arc: jest.fn(),
+      scale: jest.fn(),
+      strokeRect: jest.fn(),
+      fillText: jest.fn(),
+      clearRect: jest.fn(),
+      drawImage: jest.fn(),
+      createLinearGradient: jest.fn(() => ({
+        addColorStop: jest.fn(),
+      })),
+      fillStyle: '',
+      shadowBlur: 0,
+      shadowColor: '',
+      shadowOffsetX: 0,
+      shadowOffsetY: 0,
+    })),
+  });
+
+  // Mock getBoundingClientRect
+  Object.defineProperty(HTMLCanvasElement.prototype, 'getBoundingClientRect', {
+    writable: true,
+    value: jest.fn(() => ({
+      width: 300,
+      height: 150,
+      top: 0,
+      left: 0,
+      right: 300,
+      bottom: 150,
+    })),
+  });
 });
 
 test('renders Start Game button', () => {
@@ -21,20 +54,4 @@ test('renders How to Play guide initially', () => {
   render(<App />);
   const guideTitle = screen.getByText(/How to Play/i);
   expect(guideTitle).toBeInTheDocument();
-// Mock HTMLCanvasElement.getContext
-beforeAll(() => {
-  HTMLCanvasElement.prototype.getContext = jest.fn(() => ({
-    clearRect: jest.fn(),
-    drawImage: jest.fn(),
-    fillRect: jest.fn(),
-    strokeRect: jest.fn(),
-    fillText: jest.fn(),
-    // Add other methods used in your app
-  }));
-});
-
-test('renders learn react link', () => {
-  render(<App />);
-  const linkElement = screen.getByText(/How to Play/i);
-  expect(linkElement).toBeInTheDocument();
 });
