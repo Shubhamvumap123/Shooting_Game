@@ -361,46 +361,45 @@ function App() {
         </canvas>
 
         {showGuide && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
-            <div className="bg-white rounded-2xl shadow-xl p-6 w-80 md:w-96 text-gray-800 relative">
-              <h2 className="text-xl font-bold mb-2 text-center text-amber-600">How to Play</h2>
-              <ul className="list-disc pl-5 space-y-2 text-sm md:text-base">
-                <li>Use <span className="font-semibold">Arrow Keys</span> or <span className="font-semibold">WASD</span> to move:
-                  <ul className="pl-4 list-[circle]">
-                    <li><b>Up/W</b>: Move up</li>
-                    <li><b>Down/S</b>: Move down</li>
-                    <li><b>Left/A</b>: Move left</li>
-                    <li><b>Right/D</b>: Move right</li>
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-90 backdrop-blur-sm">
+            <div className="bg-gray-800 bg-opacity-80 border border-gray-600 rounded-2xl shadow-2xl p-6 w-80 md:w-96 text-white relative">
+              <h2 className="text-2xl font-bold mb-4 text-center text-amber-400 uppercase tracking-wider">Mission Brief</h2>
+              <ul className="list-disc pl-5 space-y-2 text-sm md:text-base text-gray-300">
+                <li><span className="font-semibold text-white">Navigation:</span>
+                  <ul className="pl-4 mt-1 space-y-1 list-none">
+                    <li><span className="text-amber-500">W / Up</span> : Move Up</li>
+                    <li><span className="text-amber-500">S / Down</span> : Move Down</li>
+                    <li><span className="text-amber-500">A / Left</span> : Move Left</li>
+                    <li><span className="text-amber-500">D / Right</span> : Move Right</li>
                   </ul>
                 </li>
-                <li>Press <span className="font-semibold">Enter</span> or <span className="font-semibold">Space</span> to fire.</li>
-                <li>The gun can only move inside the canvas area.</li>
-                <li>Hit all targets to win!</li>
+                <li className="mt-2">Press <span className="font-semibold text-white">Enter / Space</span> to Fire.</li>
+                <li>Eliminate all targets to win.</li>
               </ul>
               <button
                 ref={startButtonRef}
-                className="mt-4 w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded focus:ring-4 focus:ring-amber-300 focus:outline-none"
+                className="mt-6 w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold py-3 px-4 rounded-xl shadow-lg transform transition hover:scale-105 focus:ring-4 focus:ring-amber-500/50 focus:outline-none"
                 onClick={startGame}
               >
-                Start Game
+                ENGAGE
               </button>
             </div>
           </div>)}
         {showWin && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
-            <div className="bg-white rounded-2xl shadow-2xl p-8 flex flex-col items-center animate-bounce">
-              <svg className="w-16 h-16 text-green-500 mb-4 animate-ping" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80 backdrop-blur-sm">
+            <div className="bg-gray-800 bg-opacity-90 border-2 border-green-500/50 rounded-2xl shadow-[0_0_50px_rgba(34,197,94,0.3)] p-8 flex flex-col items-center animate-bounce">
+              <svg className="w-20 h-20 text-green-400 mb-4 animate-pulse drop-shadow-[0_0_10px_rgba(74,222,128,0.5)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M9 12l2 2 4-4" />
               </svg>
-              <h2 className="text-2xl font-bold text-green-600 mb-2">Congratulations!</h2>
-              <p className="text-lg text-gray-700 mb-4">You have killed all enemies!</p>
+              <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600 mb-2">VICTORY</h2>
+              <p className="text-lg text-gray-300 mb-6">Sector Clear. All targets neutralized.</p>
               <button
                 ref={playAgainButtonRef}
-                className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-6 rounded focus:ring-4 focus:ring-amber-300 focus:outline-none"
+                className="bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition hover:scale-105 focus:ring-4 focus:ring-green-500/50 focus:outline-none"
                 onClick={() => window.location.reload()}
               >
-                Play Again
+                Replay Mission
               </button>
             </div>
           </div>

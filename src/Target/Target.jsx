@@ -44,13 +44,20 @@ export default class Target {
     ctx.strokeRect(this.x, this.y, this.width, this.height);
 
     // Draw the health text
-   ctx.fillStyle = "black"; // Set the text color to a very dark color
-  ctx.font = "bold 8px Arial"
-    ctx.fillText(
-      this.health,
-      this.x + this.width / 2.5,
-      this.y + this.height / 1.3
-    );
+    ctx.save();
+    ctx.font = "bold 10px Arial"; // Reduced from 12px
+    ctx.fillStyle = "white";
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 2;
+    
+    // Center text
+    const textX = this.x + this.width / 2;
+    const textY = this.y + this.height - 5; 
+
+    ctx.textAlign = "center";
+    ctx.strokeText(this.health, textX, textY);
+    ctx.fillText(this.health, textX, textY);
+    ctx.restore();
   }
 
   takeDamage(damage) {
