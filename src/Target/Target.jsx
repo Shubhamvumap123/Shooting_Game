@@ -15,6 +15,18 @@ export default class Target {
     this.image.onload = () => {
       this.imageLoaded = true;
     };
+    
+    // Movement properties
+    this.dx = (Math.random() * 0.5 + 0.2) * (Math.random() < 0.5 ? 1 : -1); 
+  }
+
+  update(logicalWidth) {
+    this.x += this.dx;
+
+    // Bounce off walls
+    if (this.x <= 0 || this.x + this.width >= logicalWidth) {
+      this.dx *= -1;
+    }
   }
 
   draw(ctx) {

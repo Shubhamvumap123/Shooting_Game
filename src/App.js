@@ -299,6 +299,7 @@ function App() {
   drawplayer();
   drawbullet();
   target.forEach((tar) =>{
+    tar.update(LOGICAL_WIDTH);
     tar.draw(ctx);
     if (checkcolidewith(tar)) {
       if (tar.health <= 0) {
