@@ -238,18 +238,21 @@ function App() {
   bulletSprite.src = bulletImg;
 
   function drawbullet() {
-    if (bullet.length)
+    if (bullet.length) {
+      // Optimize: Set context state once for all bullets to reduce overhead
+      ctx.save();
+      ctx.shadowColor = "rgba(255, 255, 0, 0.5)"; // Slight glow for bullets
+      ctx.shadowBlur = 2;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+
       for (var i = 0; i < bullet.length; i++) {
         // Draw bullet image instead of rectangle
         // Adjust width/height for the sprite
-        ctx.save();
-        ctx.shadowColor = "rgba(255, 255, 0, 0.5)"; // Slight glow for bullets
-        ctx.shadowBlur = 2;
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 0;
-        ctx.drawImage(bulletSprite, bullet[i][0], bullet[i][1], 10, 20); 
-        ctx.restore(); 
+        ctx.drawImage(bulletSprite, bullet[i][0], bullet[i][1], 10, 20);
       }
+      ctx.restore();
+    }
   }
 
   // Bullet Move
