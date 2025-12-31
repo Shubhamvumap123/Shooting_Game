@@ -100,14 +100,15 @@ function App() {
     explosions.current.forEach((exp, index) => {
         ctx.beginPath();
         ctx.arc(exp.x, exp.y, exp.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(0, 255, 0, ${exp.alpha})`; // Neon Green
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = "lime";
+        ctx.fillStyle = exp.color || `rgba(0, 255, 0, ${exp.alpha})`; // Use random color
+        ctx.globalAlpha = exp.alpha; // Use global alpha for proper fading
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = exp.color || "lime";
         ctx.fill();
 
         // Animate
-        exp.radius += 2; // Expand
-        exp.alpha -= 0.05; // Fade out
+        exp.radius += exp.expandRate || 2; // Expand
+        exp.alpha -= exp.fadeRate || 0.05; // Fade out
 
         // Remove if faded
         if (exp.alpha <= 0) {
@@ -307,8 +308,11 @@ function App() {
         explosions.current.push({
             x: tar.x + tar.width / 2,
             y: tar.y + tar.height / 2,
-            radius: 10,
-            alpha: 1
+            radius: 5, // Start smaller
+            alpha: 1,
+            color: `hsl(${Math.random() * 360}, 100%, 50%)`, // Random neon color
+            expandRate: Math.random() * 2 + 1, // Random expansion speed (1-3)
+            fadeRate: Math.random() * 0.05 + 0.02 // Random fade speed
         });
 
         const index = target.indexOf(tar);
