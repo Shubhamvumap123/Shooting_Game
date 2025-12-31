@@ -335,6 +335,8 @@ function App() {
   backgroundRemove();
   drawStars();
   drawExplosions();
+  drawPowerups(); // Draw Powerups
+  handleMachineGun(); // Check auto fire
   movebullet();
   drawplayer();
   drawbullet();
@@ -347,12 +349,23 @@ function App() {
         explosions.current.push({
             x: tar.x + tar.width / 2,
             y: tar.y + tar.height / 2,
-            radius: 5, // Start smaller
+            radius: 5, 
             alpha: 1,
-            color: `hsl(${Math.random() * 360}, 100%, 50%)`, // Random neon color
-            expandRate: Math.random() * 2 + 1, // Random expansion speed (1-3)
-            fadeRate: Math.random() * 0.05 + 0.02 // Random fade speed
+            color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+            expandRate: Math.random() * 2 + 1,
+            fadeRate: Math.random() * 0.05 + 0.02
         });
+        
+        // Spawn Powerup (20% chance)
+        if (Math.random() < 0.2) {
+            const type = Math.random() < 0.5 ? 'tripleShot' : 'machineGun';
+            powerups.current.push({
+                x: tar.x + tar.width / 2,
+                y: tar.y + tar.height / 2,
+                type: type,
+                color: type === 'tripleShot' ? 'cyan' : 'red'
+            });
+        }
 
         const index = target.indexOf(tar);
         target.splice(index, 1);
@@ -382,6 +395,96 @@ function App() {
     }
   }
 
+  // Powerup State
+  const powerups = useRef([]);
+  const activeEffects = useRef({ tripleShot: false, machineGun: false });
+  // Initializing space key tracking for machine gun
+  const spacePressed = useRef(false);
+
+  function drawPowerups() {
+      ctx.save();
+      powerups.current.forEach((p, index) => {
+          // Move
+          p.y += 1.5;
+
+          // Draw
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = p.color;
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+          ctx.fill();
+          
+          // Icon (Letter)
+          ctx.fillStyle = "white";
+          ctx.font = "bold 8px Arial";
+          ctx.textAlign = "center";
+          ctx.fillText(p.type === 'tripleShot' ? 'T' : 'M', p.x, p.y + 3);
+
+          // Remove if off screen
+          if (p.y > LOGICAL_HEIGHT + 10) {
+              powerups.current.splice(index, 1);
+          }
+
+          // Collision with Player
+          // Simple box/circle collision
+          const dist = Math.hypot(p.x - (player_x + player_w/2), p.y - (player_y + player_h/2));
+          if (dist < 15) {
+              activatePowerup(p.type);
+              powerups.current.splice(index, 1);
+          }
+      });
+      ctx.restore();
+  }
+
+  function activatePowerup(type) {
+      if (type === 'tripleShot') {
+          activeEffects.current.tripleShot = true;
+          setTimeout(() => activeEffects.current.tripleShot = false, 5000);
+      } else if (type === 'machineGun') {
+          activeEffects.current.machineGun = true;
+          setTimeout(() => activeEffects.current.machineGun = false, 5000);
+      }
+  }
+
+  // Machine Gun Logic (Auto Fire)
+  const lastShotTime = useRef(0);
+  function handleMachineGun() {
+      if (activeEffects.current.machineGun && spacePressed.current) {
+          const now = Date.now();
+          if (now - lastShotTime.current > 100) { // Fire every 100ms
+              fireBullet();
+              lastShotTime.current = now;
+          }
+      }
+  }
+
+  function fireBullet() {
+        // Calculate nose position relative to center
+        const centerX = player_x + player_w / 2;
+        const centerY = player_y + player_h / 2;
+        const speed = 10;
+        
+        const angles = [player_angle];
+        if (activeEffects.current.tripleShot) {
+            angles.push(player_angle - 0.3); // Left spread
+            angles.push(player_angle + 0.3); // Right spread
+        }
+
+        angles.forEach(angle => {
+            const vx = Math.sin(angle) * speed;
+            const vy = -Math.cos(angle) * speed;
+            
+            bullet.push({
+                x: centerX - 5, 
+                y: centerY - 10,
+                vx: vx,
+                vy: vy,
+                angle: angle
+            });
+        });
+  }
+
   function keyDown(e) {
     if (!isGameActive.current) return; // Block input if game not active
 
@@ -393,27 +496,10 @@ function App() {
     if (e.code === "KeyE") eKey = true;
 
     if (e.key === "Enter" || e.code === "Space") {
-        // Calculate nose position relative to center
-        const centerX = player_x + player_w / 2;
-        const centerY = player_y + player_h / 2;
-        const speed = 10;
-        
-        // Bullet vector based on player angle
-        // Subtract Math.PI / 2 because 0 degrees is usually "Right" in trig, but our ship points "Up" visually? 
-        // Or if angle 0 is up, then:
-        // x component: sin(angle)
-        // y component: -cos(angle)
-        
-        const vx = Math.sin(player_angle) * speed;
-        const vy = -Math.cos(player_angle) * speed;
-        
-        bullet.push({
-            x: centerX - 5, // Center bullet width
-            y: centerY - 10,
-            vx: vx,
-            vy: vy,
-            angle: player_angle
-        });
+        spacePressed.current = true;
+        if (!activeEffects.current.machineGun) {
+            fireBullet(); // Manual fire if no machine gun
+        }
     }
   }
 
@@ -424,6 +510,9 @@ function App() {
     else if (e.code === "ArrowDown" || e.code === "KeyS") downKey = false;
     if (e.code === "KeyQ") qKey = false;
     if (e.code === "KeyE") eKey = false;
+    if (e.key === "Enter" || e.code === "Space") {
+        spacePressed.current = false;
+    }
   }
 
   const startGame = () => {
