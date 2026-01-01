@@ -22,8 +22,13 @@ function App() {
   // Game variables (closed over by Looping and event handlers)
   let canvas, ctx,
     damage = 1,
-    player_x = (LOGICAL_WIDTH / 2) - 25, player_y = LOGICAL_HEIGHT - 25, player_w = 20, player_h = 20;
-  let bullet = [], rightKey = false, leftKey = false, upKey = false, downKey = false;
+    player_x = (LOGICAL_WIDTH / 2) - 25, player_y = LOGICAL_HEIGHT - 25, player_w = 20, player_h = 20,
+    player_angle = 0; // Rotational angle in radians
+
+  let bullet = [], // Now stores objects: {x, y, vx, vy, angle}
+      rightKey = false, leftKey = false, upKey = false, downKey = false,
+      qKey = false, eKey = false; // Rotation keys
+
   let BullWidth = 3;
   let BullHeight = 7;
   let playerImage = new Image();
@@ -100,14 +105,15 @@ function App() {
     explosions.current.forEach((exp, index) => {
         ctx.beginPath();
         ctx.arc(exp.x, exp.y, exp.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(0, 255, 0, ${exp.alpha})`; // Neon Green
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = "lime";
+        ctx.fillStyle = exp.color || `rgba(0, 255, 0, ${exp.alpha})`; // Use random color
+        ctx.globalAlpha = exp.alpha; // Use global alpha for proper fading
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = exp.color || "lime";
         ctx.fill();
 
         // Animate
-        exp.radius += 2; // Expand
-        exp.alpha -= 0.05; // Fade out
+        exp.radius += exp.expandRate || 2; // Expand
+        exp.alpha -= exp.fadeRate || 0.05; // Fade out
 
         // Remove if faded
         if (exp.alpha <= 0) {
@@ -145,6 +151,7 @@ function App() {
       
       // Get the display size of the canvas
       const rect = canvas.getBoundingClientRect();
+      if (!rect) return;
       const dpr = window.devicePixelRatio || 1;
       
       // Set the buffer size to the display size multiplied by DPR for sharp rendering
@@ -179,8 +186,6 @@ function App() {
   }, []);
 
   function drawThruster(x, y, width, height) {
-    ctx.save();
-    
     // Gradient for the flame
     const gradient = ctx.createLinearGradient(x, y, x, y + height);
     gradient.addColorStop(0, "cyan");    // Core heat
@@ -201,15 +206,30 @@ function App() {
     ctx.lineTo(x, y + flickerHeight);    // Bottom tip
     ctx.closePath();
     ctx.fill();
-
-    ctx.restore();
   }
 
   function drawplayer() {
-    if (rightKey) player_x += 3;
-    else if (leftKey) player_x -= 3;
-    if (upKey) player_y -= 3;
-    else if (downKey) player_y += 3;
+    let moveX = 0;
+    let moveY = 0;
+
+    if (rightKey) moveX = 1;
+    else if (leftKey) moveX = -1;
+    if (upKey) moveY = -1;
+    else if (downKey) moveY = 1;
+
+    // Rotation Logic
+    if (qKey) player_angle -= 0.07; // Rotate Left
+    if (eKey) player_angle += 0.07; // Rotate Right
+
+    // Normalize speed for diagonal movement
+    if (moveX !== 0 && moveY !== 0) {
+        const factor = 1 / Math.sqrt(2);
+        moveX *= factor;
+        moveY *= factor;
+    }
+
+    player_x += moveX * 3;
+    player_y += moveY * 3;
 
     // Boundaries
     if (player_x <= 0) player_x = 0;
@@ -217,19 +237,26 @@ function App() {
     if (player_y <= 0) player_y = 0;
     if ((player_y + player_h) >= LOGICAL_HEIGHT) player_y = LOGICAL_HEIGHT - player_h;
 
-    if ((player_y + player_h) >= LOGICAL_HEIGHT) player_y = LOGICAL_HEIGHT - player_h;
-
-    // Draw thruster at the bottom center of the ship
-    // Passing x (center), y (bottom), width, height of flames
-    // Overlap slightly (-5) to look attached
-    drawThruster(player_x + player_w / 2, player_y + player_h - 5, 6, 25);
-
+    // Save context for rotation
     ctx.save();
+    
+    // Move pivot to center of player
+    const centerX = player_x + player_w / 2;
+    const centerY = player_y + player_h / 2;
+    
+    ctx.translate(centerX, centerY);
+    ctx.rotate(player_angle);
+    ctx.translate(-centerX, -centerY);
+
+    // Draw thruster at the bottom center of the ship (relative to rotation)
+    drawThruster(centerX, player_y + player_h - 5, 6, 25);
+
     ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
     ctx.shadowBlur = 4;
     ctx.shadowOffsetX = 2;
     ctx.shadowOffsetY = 2;
     ctx.drawImage(playerImage, player_x, player_y, player_w, player_h);
+    
     ctx.restore();
   }
 
@@ -240,14 +267,24 @@ function App() {
   function drawbullet() {
     if (bullet.length)
       for (var i = 0; i < bullet.length; i++) {
-        // Draw bullet image instead of rectangle
-        // Adjust width/height for the sprite
+        const b = bullet[i];
+        
         ctx.save();
+        
+        // Translate to bullet position for rotation
+        const bCenterX = b.x + 5; // Half width (10/2)
+        const bCenterY = b.y + 10; // Half height (20/2)
+        
+        ctx.translate(bCenterX, bCenterY);
+        ctx.rotate(b.angle);
+        ctx.translate(-bCenterX, -bCenterY);
+
         ctx.shadowColor = "rgba(255, 255, 0, 0.5)"; // Slight glow for bullets
         ctx.shadowBlur = 2;
         ctx.shadowOffsetX = 0;
         ctx.shadowOffsetY = 0;
-        ctx.drawImage(bulletSprite, bullet[i][0], bullet[i][1], 10, 20); 
+        
+        ctx.drawImage(bulletSprite, b.x, b.y, 10, 20); 
         ctx.restore(); 
       }
   }
@@ -256,11 +293,15 @@ function App() {
   function movebullet() {
     // Iterate backwards to safely remove elements without index shifting issues
     for (var i = bullet.length - 1; i >= 0; i--) {
-      if (bullet[i][1] > -11) {
-        bullet[i][1] -= 10;
-      } else if (bullet[i][1] < -10) {
-        bullet.splice(i, 1);
-      }
+        const b = bullet[i];
+        
+        b.x += b.vx;
+        b.y += b.vy;
+
+        // Boundary check (extended slightly to ensure full exit)
+        if (b.x < -20 || b.x > LOGICAL_WIDTH + 20 || b.y < -20 || b.y > LOGICAL_HEIGHT + 20) {
+            bullet.splice(i, 1);
+        }
     }
   }
 
@@ -279,10 +320,10 @@ function App() {
   // Collide happen conditions
   function collideWith(Bullet, Enemy) {
     if (
-      Bullet[0] < Enemy.x + Enemy.width &&
-      Bullet[0] + BullWidth > Enemy.x &&
-      Bullet[1] < Enemy.y + Enemy.height &&
-      Bullet[1] + BullHeight > Enemy.y
+      Bullet.x < Enemy.x + Enemy.width &&
+      Bullet.x + 10 > Enemy.x && // Bullet width is ~10
+      Bullet.y < Enemy.y + Enemy.height &&
+      Bullet.y + 20 > Enemy.y   // Bullet height is ~20
     ) {
       Enemy.takeDamage(damage);
       return true
@@ -295,10 +336,13 @@ function App() {
   backgroundRemove();
   drawStars();
   drawExplosions();
+  drawPowerups(); // Draw Powerups
+  handleMachineGun(); // Check auto fire
   movebullet();
   drawplayer();
   drawbullet();
   target.forEach((tar) =>{
+    tar.update(LOGICAL_WIDTH, LOGICAL_HEIGHT);
     tar.draw(ctx);
     if (checkcolidewith(tar)) {
       if (tar.health <= 0) {
@@ -306,9 +350,23 @@ function App() {
         explosions.current.push({
             x: tar.x + tar.width / 2,
             y: tar.y + tar.height / 2,
-            radius: 10,
-            alpha: 1
+            radius: 5, 
+            alpha: 1,
+            color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+            expandRate: Math.random() * 2 + 1,
+            fadeRate: Math.random() * 0.05 + 0.02
         });
+        
+        // Spawn Powerup (20% chance)
+        if (Math.random() < 0.2) {
+            const type = Math.random() < 0.5 ? 'tripleShot' : 'machineGun';
+            powerups.current.push({
+                x: tar.x + tar.width / 2,
+                y: tar.y + tar.height / 2,
+                type: type,
+                color: type === 'tripleShot' ? 'cyan' : 'red'
+            });
+        }
 
         const index = target.indexOf(tar);
         target.splice(index, 1);
@@ -321,6 +379,111 @@ function App() {
       setShowWin(true);
       isGameActive.current = false; // Stop input on win
     }
+    
+    // Party Animation (Fireworks on win)
+    if (showWin) {
+        if (Math.random() < 0.1) { // 10% chance per frame to spawn firework
+            explosions.current.push({
+                x: Math.random() * LOGICAL_WIDTH,
+                y: Math.random() * LOGICAL_HEIGHT,
+                radius: 5, 
+                alpha: 1, 
+                color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+                expandRate: Math.random() * 2 + 1,
+                fadeRate: Math.random() * 0.05 + 0.02
+            });
+        }
+    }
+  }
+
+  // Powerup State
+  const powerups = useRef([]);
+  const activeEffects = useRef({ tripleShot: false, machineGun: false });
+  // Initializing space key tracking for machine gun
+  const spacePressed = useRef(false);
+
+  function drawPowerups() {
+      ctx.save();
+      powerups.current.forEach((p, index) => {
+          // Move
+          p.y += 1.5;
+
+          // Draw
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = p.color;
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+          ctx.fill();
+          
+          // Icon (Letter)
+          ctx.fillStyle = "white";
+          ctx.font = "bold 8px Arial";
+          ctx.textAlign = "center";
+          ctx.fillText(p.type === 'tripleShot' ? 'T' : 'M', p.x, p.y + 3);
+
+          // Remove if off screen
+          if (p.y > LOGICAL_HEIGHT + 10) {
+              powerups.current.splice(index, 1);
+          }
+
+          // Collision with Player
+          // Simple box/circle collision
+          const dist = Math.hypot(p.x - (player_x + player_w/2), p.y - (player_y + player_h/2));
+          if (dist < 15) {
+              activatePowerup(p.type);
+              powerups.current.splice(index, 1);
+          }
+      });
+      ctx.restore();
+  }
+
+  function activatePowerup(type) {
+      if (type === 'tripleShot') {
+          activeEffects.current.tripleShot = true;
+          setTimeout(() => activeEffects.current.tripleShot = false, 5000);
+      } else if (type === 'machineGun') {
+          activeEffects.current.machineGun = true;
+          setTimeout(() => activeEffects.current.machineGun = false, 5000);
+      }
+  }
+
+  // Machine Gun Logic (Auto Fire)
+  const lastShotTime = useRef(0);
+  function handleMachineGun() {
+      if (activeEffects.current.machineGun && spacePressed.current) {
+          const now = Date.now();
+          if (now - lastShotTime.current > 100) { // Fire every 100ms
+              fireBullet();
+              lastShotTime.current = now;
+          }
+      }
+  }
+
+  function fireBullet() {
+        // Calculate nose position relative to center
+        const centerX = player_x + player_w / 2;
+        const centerY = player_y + player_h / 2;
+        const speed = 10;
+        
+        const angles = [player_angle];
+        if (activeEffects.current.tripleShot) {
+            angles.push(player_angle - 0.3); // Left spread
+            angles.push(player_angle + 0.3); // Right spread
+        }
+
+        angles.forEach(angle => {
+            const vx = Math.sin(angle) * speed;
+            const vy = -Math.cos(angle) * speed;
+            
+            bullet.push({
+                x: centerX - 5, 
+                y: centerY - 10,
+                vx: vx,
+                vy: vy,
+                angle: angle
+            });
+        });
   }
 
   function keyDown(e) {
@@ -330,9 +493,14 @@ function App() {
     else if (e.code === "ArrowLeft" || e.code === "KeyA") leftKey = true;
     if (e.code === "ArrowUp" || e.code === "KeyW") upKey = true;
     else if (e.code === "ArrowDown" || e.code === "KeyS") downKey = true;
+    if (e.code === "KeyQ") qKey = true;
+    if (e.code === "KeyE") eKey = true;
 
     if (e.key === "Enter" || e.code === "Space") {
-      bullet.push([player_x + 7, player_y, BullWidth, BullHeight]);
+        spacePressed.current = true;
+        if (!activeEffects.current.machineGun) {
+            fireBullet(); // Manual fire if no machine gun
+        }
     }
   }
 
@@ -341,6 +509,11 @@ function App() {
     else if (e.code === "ArrowLeft" || e.code === "KeyA") leftKey = false;
     if (e.code === "ArrowUp" || e.code === "KeyW") upKey = false;
     else if (e.code === "ArrowDown" || e.code === "KeyS") downKey = false;
+    if (e.code === "KeyQ") qKey = false;
+    if (e.code === "KeyE") eKey = false;
+    if (e.key === "Enter" || e.code === "Space") {
+        spacePressed.current = false;
+    }
   }
 
   const startGame = () => {
@@ -351,55 +524,71 @@ function App() {
   return (
     <div className=' bg-gray-900 '>
       <div className='flex items-center justify-center h-screen'>
-        <canvas className='w-full h-full rounded-3xl' style={{
-          backgroundRepeat: "no-repeat",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundImage: `url(${spaceBg})`,
-        }} ref={canvasRef} >
+        <canvas
+          className='w-full h-full rounded-3xl'
+          style={{
+            backgroundRepeat: "no-repeat",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundImage: `url(${spaceBg})`,
+          }}
+          ref={canvasRef}
+          role="img"
+          aria-label="Space shooter game canvas. Use arrow keys or WASD to move, Space or Enter to fire."
+        >
         </canvas>
 
         {showGuide && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
-            <div className="bg-white rounded-2xl shadow-xl p-6 w-80 md:w-96 text-gray-800 relative">
-              <h2 className="text-xl font-bold mb-2 text-center text-amber-600">How to Play</h2>
-              <ul className="list-disc pl-5 space-y-2 text-sm md:text-base">
-                <li>Use <span className="font-semibold">Arrow Keys</span> or <span className="font-semibold">WASD</span> to move:
-                  <ul className="pl-4 list-[circle]">
-                    <li><b>Up/W</b>: Move up</li>
-                    <li><b>Down/S</b>: Move down</li>
-                    <li><b>Left/A</b>: Move left</li>
-                    <li><b>Right/D</b>: Move right</li>
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-90 backdrop-blur-sm"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="mission-brief-title"
+          >
+            <div className="bg-gray-800 bg-opacity-80 border border-gray-600 rounded-2xl shadow-2xl p-6 w-80 md:w-96 text-white relative">
+              <h2 id="mission-brief-title" className="text-2xl font-bold mb-4 text-center text-amber-400 uppercase tracking-wider">Mission Brief</h2>
+              <ul className="list-disc pl-5 space-y-2 text-sm md:text-base text-gray-300">
+                <li><span className="font-semibold text-white">Navigation:</span>
+                  <ul className="pl-4 mt-1 space-y-1 list-none">
+                    <li><span className="text-amber-500">W / Up</span> : Move Up</li>
+                    <li><span className="text-amber-500">S / Down</span> : Move Down</li>
+                    <li><span className="text-amber-500">A / Left</span> : Move Left</li>
+                    <li><span className="text-amber-500">D / Right</span> : Move Right</li>
+                    <li><span className="text-amber-500">Q / E</span> : Rotate Ship</li>
                   </ul>
                 </li>
-                <li>Press <span className="font-semibold">Enter</span> or <span className="font-semibold">Space</span> to fire.</li>
-                <li>The gun can only move inside the canvas area.</li>
-                <li>Hit all targets to win!</li>
+                <li className="mt-2">Press <span className="font-semibold text-white">Enter / Space</span> to Fire.</li>
+                <li>Eliminate all targets to win.</li>
               </ul>
               <button
                 ref={startButtonRef}
-                className="mt-4 w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded focus:ring-4 focus:ring-amber-300 focus:outline-none"
+                className="mt-6 w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold py-3 px-4 rounded-xl shadow-lg transform transition hover:scale-105 focus:ring-4 focus:ring-amber-500/50 focus:outline-none"
                 onClick={startGame}
               >
-                Start Game
+                ENGAGE
               </button>
             </div>
           </div>)}
         {showWin && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
-            <div className="bg-white rounded-2xl shadow-2xl p-8 flex flex-col items-center animate-bounce">
-              <svg className="w-16 h-16 text-green-500 mb-4 animate-ping" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80 backdrop-blur-sm"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="victory-title"
+          >
+            <div className="bg-gray-800 bg-opacity-90 border-2 border-green-500/50 rounded-2xl shadow-[0_0_50px_rgba(34,197,94,0.3)] p-8 flex flex-col items-center animate-bounce">
+              <svg className="w-20 h-20 text-green-400 mb-4 animate-pulse drop-shadow-[0_0_10px_rgba(74,222,128,0.5)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M9 12l2 2 4-4" />
               </svg>
-              <h2 className="text-2xl font-bold text-green-600 mb-2">Congratulations!</h2>
-              <p className="text-lg text-gray-700 mb-4">You have killed all enemies!</p>
+              <h2 id="victory-title" className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600 mb-2">VICTORY</h2>
+              <p className="text-lg text-gray-300 mb-6">Sector Clear. All targets neutralized.</p>
               <button
                 ref={playAgainButtonRef}
-                className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-6 rounded focus:ring-4 focus:ring-amber-300 focus:outline-none"
+                className="bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition hover:scale-105 focus:ring-4 focus:ring-green-500/50 focus:outline-none"
                 onClick={() => window.location.reload()}
               >
-                Play Again
+                Replay Mission
               </button>
             </div>
           </div>

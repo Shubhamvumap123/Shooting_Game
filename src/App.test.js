@@ -35,12 +35,12 @@ beforeAll(() => {
 
 test('renders Start Game button', () => {
   render(<App />);
-  const startButton = screen.getByText(/Start Game/i);
+  const startButton = screen.getByText(/ENGAGE/i);
   expect(startButton).toBeInTheDocument();
 });
 
-test('renders How to Play guide initially', () => {
+test('renders Mission Brief guide initially', () => {
   render(<App />);
-  const guideTitle = screen.getByText(/How to Play/i);
+  const guideTitle = screen.getByText(/Mission Brief/i);
   expect(guideTitle).toBeInTheDocument();
 });
