@@ -161,7 +161,9 @@ function App() {
       const scaleX = canvas.width / LOGICAL_WIDTH;
       const scaleY = canvas.height / LOGICAL_HEIGHT;
       
-      ctx.scale(scaleX, scaleY);
+      if (ctx) {
+        ctx.scale(scaleX, scaleY);
+      }
     };
 
     // Initial sizing
