@@ -151,6 +151,7 @@ function App() {
       
       // Get the display size of the canvas
       const rect = canvas.getBoundingClientRect();
+      if (!rect) return;
       const dpr = window.devicePixelRatio || 1;
       
       // Set the buffer size to the display size multiplied by DPR for sharp rendering
@@ -523,18 +524,29 @@ function App() {
   return (
     <div className=' bg-gray-900 '>
       <div className='flex items-center justify-center h-screen'>
-        <canvas className='w-full h-full rounded-3xl' style={{
-          backgroundRepeat: "no-repeat",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundImage: `url(${spaceBg})`,
-        }} ref={canvasRef} >
+        <canvas
+          className='w-full h-full rounded-3xl'
+          style={{
+            backgroundRepeat: "no-repeat",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundImage: `url(${spaceBg})`,
+          }}
+          ref={canvasRef}
+          role="img"
+          aria-label="Space shooter game canvas. Use arrow keys or WASD to move, Space or Enter to fire."
+        >
         </canvas>
 
         {showGuide && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-90 backdrop-blur-sm">
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-90 backdrop-blur-sm"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="mission-brief-title"
+          >
             <div className="bg-gray-800 bg-opacity-80 border border-gray-600 rounded-2xl shadow-2xl p-6 w-80 md:w-96 text-white relative">
-              <h2 className="text-2xl font-bold mb-4 text-center text-amber-400 uppercase tracking-wider">Mission Brief</h2>
+              <h2 id="mission-brief-title" className="text-2xl font-bold mb-4 text-center text-amber-400 uppercase tracking-wider">Mission Brief</h2>
               <ul className="list-disc pl-5 space-y-2 text-sm md:text-base text-gray-300">
                 <li><span className="font-semibold text-white">Navigation:</span>
                   <ul className="pl-4 mt-1 space-y-1 list-none">
@@ -558,13 +570,18 @@ function App() {
             </div>
           </div>)}
         {showWin && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80 backdrop-blur-sm">
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80 backdrop-blur-sm"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="victory-title"
+          >
             <div className="bg-gray-800 bg-opacity-90 border-2 border-green-500/50 rounded-2xl shadow-[0_0_50px_rgba(34,197,94,0.3)] p-8 flex flex-col items-center animate-bounce">
               <svg className="w-20 h-20 text-green-400 mb-4 animate-pulse drop-shadow-[0_0_10px_rgba(74,222,128,0.5)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M9 12l2 2 4-4" />
               </svg>
-              <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600 mb-2">VICTORY</h2>
+              <h2 id="victory-title" className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600 mb-2">VICTORY</h2>
               <p className="text-lg text-gray-300 mb-6">Sector Clear. All targets neutralized.</p>
               <button
                 ref={playAgainButtonRef}
