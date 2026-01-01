@@ -1,10 +1,3 @@
-## 2024-05-23 - Accessible Modals & High Contrast
-
-**Learning:**
-Standard color palettes often fail accessibility checks in their default shades. While `amber-500` is visually appealing, it fails WCAG AA contrast against white text (2.56:1). Switching to `amber-700` (5.76:1) ensures readability without sacrificing the design language.
-Also, visual modals often lack semantic structure. Adding `role="dialog"`, `aria-modal="true"`, and `aria-labelledby` is critical for screen reader users to understand context and focus boundaries.
-
-**Action:**
-- Always check contrast ratios for primary buttons, especially with white text.
-- Use `amber-700` or darker for accessible amber buttons.
-- Wrap all modal overlays in `role="dialog"` with explicit labelling.
+## 2024-01-01 - Canvas Accessibility & Test Stability
+**Learning:** Canvas elements in game interfaces are completely invisible to screen readers without `role="img"` and a descriptive `aria-label`. Also, when testing React components that access DOM measurements (like `getBoundingClientRect`), strictly guarding against null/undefined returns is crucial for test stability in JSDOM environments, even if the element exists.
+**Action:** Always add ARIA roles/labels to canvas elements and defensive checks for DOM rects in `useEffect` logic.
