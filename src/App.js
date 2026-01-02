@@ -8,12 +8,15 @@ import bulletImg from './assets/hd_bullet.png';
 function App() {
   const [showGuide, setShowGuide] = useState(true);
   const [showWin, setShowWin] = useState(false);
+  const [paused, setPaused] = useState(false);
   const canvasRef = useRef(null);
   const isGameActive = useRef(false); // New ref to track game state
+  const pausedRef = useRef(false); // Ref for game loop control
 
   // Refs for UX focus management
   const startButtonRef = useRef(null);
   const playAgainButtonRef = useRef(null);
+  const resumeButtonRef = useRef(null);
 
   // Game logical size
   const LOGICAL_WIDTH = 300;
@@ -133,6 +136,12 @@ function App() {
       startButtonRef.current.focus();
     }
   }, [showGuide]);
+
+  useEffect(() => {
+    if (paused && resumeButtonRef.current) {
+      resumeButtonRef.current.focus();
+    }
+  }, [paused]);
 
   useEffect(() => {
     if (showWin && playAgainButtonRef.current) {
@@ -333,6 +342,11 @@ function App() {
 
   //loop according to working
   function Looping(){     
+  // If paused, skip the game loop update.
+  // Since we use setInterval, this function will be called again in the next tick,
+  // so we don't need to manually reschedule it.
+  if (pausedRef.current) return;
+
   backgroundRemove();
   drawStars();
   drawExplosions();
@@ -487,7 +501,16 @@ function App() {
   }
 
   function keyDown(e) {
-    if (!isGameActive.current) return; // Block input if game not active
+    if (!isGameActive.current && !pausedRef.current) return; // Block input if game not active
+
+    // Pause Toggle
+    if (e.code === "Escape" && isGameActive.current && !showWin) {
+      pausedRef.current = !pausedRef.current;
+      setPaused(pausedRef.current);
+      return;
+    }
+
+    if (pausedRef.current) return; // Block controls when paused
 
     if (e.code === "ArrowRight" || e.code === "KeyD") rightKey = true;
     else if (e.code === "ArrowLeft" || e.code === "KeyA") leftKey = true;
@@ -519,6 +542,11 @@ function App() {
   const startGame = () => {
     setShowGuide(false);
     isGameActive.current = true;
+  };
+
+  const togglePause = () => {
+    pausedRef.current = !pausedRef.current;
+    setPaused(pausedRef.current);
   };
 
   return (
@@ -569,6 +597,25 @@ function App() {
               </button>
             </div>
           </div>)}
+        {paused && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="pause-title"
+          >
+            <div className="bg-gray-800 border border-gray-600 rounded-xl shadow-2xl p-6 text-center">
+              <h2 id="pause-title" className="text-2xl font-bold text-white mb-4 tracking-widest">PAUSED</h2>
+              <button
+                ref={resumeButtonRef}
+                className="bg-amber-600 hover:bg-amber-500 text-white font-bold py-2 px-6 rounded-lg shadow transition focus:ring-2 focus:ring-amber-400 focus:outline-none"
+                onClick={togglePause}
+              >
+                Resume
+              </button>
+            </div>
+          </div>
+        )}
         {showWin && (
           <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80 backdrop-blur-sm"
