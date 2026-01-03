@@ -10,6 +10,8 @@ function App() {
   const [showWin, setShowWin] = useState(false);
   const canvasRef = useRef(null);
   const isGameActive = useRef(false); // New ref to track game state
+  const pausedRef = useRef(false);
+  const [isPaused, setIsPaused] = useState(false);
 
   // Refs for UX focus management
   const startButtonRef = useRef(null);
@@ -332,7 +334,8 @@ function App() {
   }
 
   //loop according to working
-  function Looping(){     
+  function Looping(){
+  if (pausedRef.current) return;
   backgroundRemove();
   drawStars();
   drawExplosions();
@@ -489,6 +492,15 @@ function App() {
   function keyDown(e) {
     if (!isGameActive.current) return; // Block input if game not active
 
+    // Toggle Pause
+    if (e.code === "Escape") {
+      pausedRef.current = !pausedRef.current;
+      setIsPaused(pausedRef.current);
+      return;
+    }
+
+    if (pausedRef.current) return;
+
     if (e.code === "ArrowRight" || e.code === "KeyD") rightKey = true;
     else if (e.code === "ArrowLeft" || e.code === "KeyA") leftKey = true;
     if (e.code === "ArrowUp" || e.code === "KeyW") upKey = true;
@@ -590,6 +602,14 @@ function App() {
               >
                 Replay Mission
               </button>
+            </div>
+          </div>
+        )}
+
+        {isPaused && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+            <div className="text-white text-4xl font-bold tracking-widest animate-pulse">
+              PAUSED
             </div>
           </div>
         )}
