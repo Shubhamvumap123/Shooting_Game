@@ -29,8 +29,6 @@ function App() {
       rightKey = false, leftKey = false, upKey = false, downKey = false,
       qKey = false, eKey = false; // Rotation keys
 
-  let BullWidth = 3;
-  let BullHeight = 7;
   let playerImage = new Image();
   playerImage.src = gun;
 

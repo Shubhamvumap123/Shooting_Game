@@ -31,7 +31,7 @@ export default class Target {
     }
 
     // Bounce off walls (Vertical)
-    if (this.y <= 0 || this.y + this.height >= logicalHeight && this.dy > 0) {
+    if (this.y <= 0 || (this.y + this.height >= logicalHeight && this.dy > 0)) {
         this.dy *= -1;
     }
   }
