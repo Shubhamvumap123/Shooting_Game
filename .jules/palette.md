@@ -1,3 +1,3 @@
-## 2024-01-01 - Canvas Accessibility & Test Stability
-**Learning:** Canvas elements in game interfaces are completely invisible to screen readers without `role="img"` and a descriptive `aria-label`. Also, when testing React components that access DOM measurements (like `getBoundingClientRect`), strictly guarding against null/undefined returns is crucial for test stability in JSDOM environments, even if the element exists.
-**Action:** Always add ARIA roles/labels to canvas elements and defensive checks for DOM rects in `useEffect` logic.
+## 2024-01-01 - Pause Functionality & React Closures
+**Learning:** When implementing pause functionality in a game loop running via `setInterval` inside a React `useEffect`, standard state variables will be stale inside the loop's closure.
+**Action:** Use a `useRef` to track the mutable pause state for the game loop, while simultaneously using `useState` to trigger UI updates (like a "PAUSED" overlay) to keep the visual state in sync.
