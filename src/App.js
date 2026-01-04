@@ -8,12 +8,19 @@ import bulletImg from './assets/hd_bullet.png';
 function App() {
   const [showGuide, setShowGuide] = useState(true);
   const [showWin, setShowWin] = useState(false);
+  const [isPaused, setIsPaused] = useState(false); // UI state for pause
   const canvasRef = useRef(null);
-  const isGameActive = useRef(false); // New ref to track game state
+  const isGameActive = useRef(false); // Controls input processing
+
+  // Refs for game loop logic
+  const pausedRef = useRef(false);
+  const gameStartedRef = useRef(false);
+  const gameWonRef = useRef(false);
 
   // Refs for UX focus management
   const startButtonRef = useRef(null);
   const playAgainButtonRef = useRef(null);
+  const resumeButtonRef = useRef(null);
 
   // Game logical size
   const LOGICAL_WIDTH = 300;
@@ -29,8 +36,8 @@ function App() {
       rightKey = false, leftKey = false, upKey = false, downKey = false,
       qKey = false, eKey = false; // Rotation keys
 
-  let BullWidth = 3;
-  let BullHeight = 7;
+  let BullWidth = 3; // eslint-disable-line no-unused-vars
+  let BullHeight = 7; // eslint-disable-line no-unused-vars
   let playerImage = new Image();
   playerImage.src = gun;
 
@@ -139,6 +146,17 @@ function App() {
       playAgainButtonRef.current.focus();
     }
   }, [showWin]);
+
+  useEffect(() => {
+    if (isPaused && resumeButtonRef.current) {
+        resumeButtonRef.current.focus();
+    } else if (!isPaused && !showGuide && !showWin) {
+        // Return focus to canvas or just ensure keys work
+        // We rely on document-level listeners, so explicit focus on canvas isn't strictly necessary for keys,
+        // but good for accessibility contexts.
+        canvasRef.current?.focus();
+    }
+  }, [isPaused, showGuide, showWin]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -333,6 +351,8 @@ function App() {
 
   //loop according to working
   function Looping(){     
+  if (pausedRef.current) return;
+
   backgroundRemove();
   drawStars();
   drawExplosions();
@@ -375,9 +395,12 @@ function App() {
   });
 
     // Show win animation if all targets are killed
-    if (target.length === 0 && !showWin) {
-      setShowWin(true);
-      isGameActive.current = false; // Stop input on win
+    if (target.length === 0) {
+      if (!gameWonRef.current) {
+        gameWonRef.current = true;
+        setShowWin(true);
+        isGameActive.current = false; // Stop input on win
+      }
     }
     
     // Party Animation (Fireworks on win)
@@ -486,7 +509,22 @@ function App() {
         });
   }
 
+  function togglePause() {
+    if (gameWonRef.current) return;
+    const nextPaused = !pausedRef.current;
+    pausedRef.current = nextPaused;
+    setIsPaused(nextPaused);
+    isGameActive.current = !nextPaused;
+  }
+
   function keyDown(e) {
+    if (e.code === "Escape") {
+        if (gameStartedRef.current && !gameWonRef.current) {
+            togglePause();
+        }
+        return;
+    }
+
     if (!isGameActive.current) return; // Block input if game not active
 
     if (e.code === "ArrowRight" || e.code === "KeyD") rightKey = true;
@@ -519,6 +557,7 @@ function App() {
   const startGame = () => {
     setShowGuide(false);
     isGameActive.current = true;
+    gameStartedRef.current = true;
   };
 
   return (
@@ -534,9 +573,46 @@ function App() {
           }}
           ref={canvasRef}
           role="img"
-          aria-label="Space shooter game canvas. Use arrow keys or WASD to move, Space or Enter to fire."
+          aria-label="Space shooter game canvas. Use arrow keys or WASD to move, Space or Enter to fire, Escape to pause."
         >
         </canvas>
+
+        {/* Pause Button - Only show when game is running and not paused/won/guide */}
+        {!showGuide && !showWin && !isPaused && (
+            <button
+                className="fixed top-4 right-4 z-40 bg-gray-800/80 hover:bg-gray-700 text-white p-2 rounded-full border border-gray-600 transition-all focus:ring-2 focus:ring-amber-500"
+                onClick={togglePause}
+                aria-label="Pause Game"
+                title="Pause Game (Esc)"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </button>
+        )}
+
+        {/* Pause Overlay */}
+        {isPaused && (
+            <div
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Game Paused"
+            >
+                <div className="bg-gray-800 bg-opacity-90 border border-gray-600 rounded-xl shadow-2xl p-8 text-center">
+                    <h2 className="text-3xl font-bold text-white mb-6 tracking-widest">PAUSED</h2>
+                    <div className="flex flex-col gap-4">
+                        <button
+                            ref={resumeButtonRef}
+                            className="bg-amber-600 hover:bg-amber-500 text-white font-bold py-3 px-8 rounded-lg transition hover:scale-105 focus:ring-2 focus:ring-amber-400"
+                            onClick={togglePause}
+                        >
+                            RESUME
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
 
         {showGuide && (
           <div
@@ -555,6 +631,7 @@ function App() {
                     <li><span className="text-amber-500">A / Left</span> : Move Left</li>
                     <li><span className="text-amber-500">D / Right</span> : Move Right</li>
                     <li><span className="text-amber-500">Q / E</span> : Rotate Ship</li>
+                    <li><span className="text-amber-500">Esc</span> : Pause Game</li>
                   </ul>
                 </li>
                 <li className="mt-2">Press <span className="font-semibold text-white">Enter / Space</span> to Fire.</li>
