@@ -8,8 +8,10 @@ import bulletImg from './assets/hd_bullet.png';
 function App() {
   const [showGuide, setShowGuide] = useState(true);
   const [showWin, setShowWin] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const canvasRef = useRef(null);
   const isGameActive = useRef(false); // New ref to track game state
+  const pausedRef = useRef(false);
 
   // Refs for UX focus management
   const startButtonRef = useRef(null);
@@ -332,7 +334,11 @@ function App() {
   }
 
   //loop according to working
-  function Looping(){     
+  function Looping(){
+    // Check pause state. Since we use setInterval, returning here skips this frame's logic
+    // but the interval continues to fire, allowing resume on next tick if pausedRef changes.
+    if (pausedRef.current) return;
+
   backgroundRemove();
   drawStars();
   drawExplosions();
@@ -487,7 +493,13 @@ function App() {
   }
 
   function keyDown(e) {
-    if (!isGameActive.current) return; // Block input if game not active
+    // Handle Pause
+    if (e.code === "Escape" && isGameActive.current && !showWin) {
+      pausedRef.current = !pausedRef.current;
+      setIsPaused(pausedRef.current);
+    }
+
+    if (!isGameActive.current || pausedRef.current) return; // Block input if game not active or paused
 
     if (e.code === "ArrowRight" || e.code === "KeyD") rightKey = true;
     else if (e.code === "ArrowLeft" || e.code === "KeyA") leftKey = true;
@@ -538,6 +550,13 @@ function App() {
         >
         </canvas>
 
+        {isPaused && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm">
+            <div className="bg-black/70 text-white px-8 py-4 rounded-xl backdrop-blur-md border border-white/20 shadow-2xl animate-pulse">
+              <h2 className="text-4xl font-black tracking-widest italic uppercase">PAUSED</h2>
+            </div>
+          </div>
+        )}
         {showGuide && (
           <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-90 backdrop-blur-sm"

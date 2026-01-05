@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import App from './App';
 
 // Mock canvas getContext
@@ -18,6 +18,10 @@ beforeAll(() => {
     fill: jest.fn(),
     arc: jest.fn(),
     scale: jest.fn(),
+    rotate: jest.fn(),
+    translate: jest.fn(),
+    shadowColor: '',
+    shadowBlur: 0,
     createLinearGradient: jest.fn(() => ({
       addColorStop: jest.fn(),
     })),
@@ -43,4 +47,23 @@ test('renders Mission Brief guide initially', () => {
   render(<App />);
   const guideTitle = screen.getByText(/Mission Brief/i);
   expect(guideTitle).toBeInTheDocument();
+});
+
+test('shows Pause overlay when Escape is pressed during game', () => {
+  render(<App />);
+
+  // 1. Start the game by clicking "ENGAGE"
+  const startButton = screen.getByText(/ENGAGE/i);
+  fireEvent.click(startButton);
+
+  // 2. Press Escape
+  fireEvent.keyDown(document, { code: 'Escape' });
+
+  // 3. Check for "PAUSED" text
+  const pauseText = screen.getByText(/PAUSED/i);
+  expect(pauseText).toBeInTheDocument();
+
+  // 4. Press Escape again to resume
+  fireEvent.keyDown(document, { code: 'Escape' });
+  expect(pauseText).not.toBeInTheDocument();
 });
