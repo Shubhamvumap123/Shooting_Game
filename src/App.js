@@ -62,6 +62,7 @@ function App() {
     ctx.save();
     ctx.shadowBlur = 8; // Increased glow
     ctx.shadowColor = "white";
+    const now = Date.now();
 
     stars.current.forEach(star => {
       ctx.beginPath();
@@ -90,7 +91,7 @@ function App() {
       star.x -= star.speed;
       
       // Undeterministic Drift
-      star.y += Math.sin(Date.now() * star.driftSpeed) * star.driftAmplitude;
+      star.y += Math.sin(now * star.driftSpeed) * star.driftAmplitude;
 
       if (star.x < 0) {
         star.x = LOGICAL_WIDTH;
