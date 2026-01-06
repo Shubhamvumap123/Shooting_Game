@@ -8,12 +8,15 @@ import bulletImg from './assets/hd_bullet.png';
 function App() {
   const [showGuide, setShowGuide] = useState(true);
   const [showWin, setShowWin] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const canvasRef = useRef(null);
   const isGameActive = useRef(false); // New ref to track game state
+  const pausedRef = useRef(false);
 
   // Refs for UX focus management
   const startButtonRef = useRef(null);
   const playAgainButtonRef = useRef(null);
+  const resumeButtonRef = useRef(null);
 
   // Game logical size
   const LOGICAL_WIDTH = 300;
@@ -139,6 +142,12 @@ function App() {
       playAgainButtonRef.current.focus();
     }
   }, [showWin]);
+
+  useEffect(() => {
+    if (isPaused && resumeButtonRef.current) {
+      resumeButtonRef.current.focus();
+    }
+  }, [isPaused]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -333,6 +342,7 @@ function App() {
 
   //loop according to working
   function Looping(){     
+  if (pausedRef.current) return;
   backgroundRemove();
   drawStars();
   drawExplosions();
@@ -487,7 +497,18 @@ function App() {
   }
 
   function keyDown(e) {
-    if (!isGameActive.current) return; // Block input if game not active
+    if (e.code === "Escape" && isGameActive.current) {
+        pausedRef.current = !pausedRef.current;
+        setIsPaused(pausedRef.current);
+        // Reset keys on pause to prevent stuck movement
+        if (pausedRef.current) {
+            rightKey = false; leftKey = false; upKey = false; downKey = false;
+            qKey = false; eKey = false; spacePressed.current = false;
+        }
+        return;
+    }
+
+    if (!isGameActive.current || pausedRef.current) return; // Block input if game not active or paused
 
     if (e.code === "ArrowRight" || e.code === "KeyD") rightKey = true;
     else if (e.code === "ArrowLeft" || e.code === "KeyA") leftKey = true;
@@ -537,6 +558,29 @@ function App() {
           aria-label="Space shooter game canvas. Use arrow keys or WASD to move, Space or Enter to fire."
         >
         </canvas>
+
+        {isPaused && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="pause-title"
+          >
+            <div className="bg-gray-800 bg-opacity-90 border border-amber-500/30 rounded-2xl shadow-2xl p-8 flex flex-col items-center">
+              <h2 id="pause-title" className="text-3xl font-bold text-amber-400 mb-6 tracking-widest">PAUSED</h2>
+              <button
+                ref={resumeButtonRef}
+                className="bg-amber-600 hover:bg-amber-500 text-white font-bold py-3 px-12 rounded-xl shadow-lg transform transition hover:scale-105 focus:ring-4 focus:ring-amber-500/50 focus:outline-none"
+                onClick={() => {
+                  pausedRef.current = false;
+                  setIsPaused(false);
+                }}
+              >
+                RESUME
+              </button>
+            </div>
+          </div>
+        )}
 
         {showGuide && (
           <div
