@@ -8,8 +8,10 @@ import bulletImg from './assets/hd_bullet.png';
 function App() {
   const [showGuide, setShowGuide] = useState(true);
   const [showWin, setShowWin] = useState(false);
+  const [isPaused, setIsPaused] = useState(false); // UI state for pause overlay
   const canvasRef = useRef(null);
-  const isGameActive = useRef(false); // New ref to track game state
+  const isGameActive = useRef(false); // Track game active state
+  const pausedRef = useRef(false); // Track pause state for game loop
 
   // Refs for UX focus management
   const startButtonRef = useRef(null);
@@ -29,8 +31,6 @@ function App() {
       rightKey = false, leftKey = false, upKey = false, downKey = false,
       qKey = false, eKey = false; // Rotation keys
 
-  let BullWidth = 3;
-  let BullHeight = 7;
   let playerImage = new Image();
   playerImage.src = gun;
 
@@ -332,7 +332,9 @@ function App() {
   }
 
   //loop according to working
-  function Looping(){     
+  function Looping(){
+  if (pausedRef.current) return; // Pause the game loop
+
   backgroundRemove();
   drawStars();
   drawExplosions();
@@ -489,6 +491,15 @@ function App() {
   function keyDown(e) {
     if (!isGameActive.current) return; // Block input if game not active
 
+    // Pause Toggle
+    if (e.code === "Escape") {
+        pausedRef.current = !pausedRef.current;
+        setIsPaused(pausedRef.current);
+        return;
+    }
+
+    if (pausedRef.current) return; // Block other inputs while paused
+
     if (e.code === "ArrowRight" || e.code === "KeyD") rightKey = true;
     else if (e.code === "ArrowLeft" || e.code === "KeyA") leftKey = true;
     if (e.code === "ArrowUp" || e.code === "KeyW") upKey = true;
@@ -534,7 +545,7 @@ function App() {
           }}
           ref={canvasRef}
           role="img"
-          aria-label="Space shooter game canvas. Use arrow keys or WASD to move, Space or Enter to fire."
+          aria-label="Space shooter game canvas. Use arrow keys or WASD to move, Space or Enter to fire, Escape to pause."
         >
         </canvas>
 
@@ -558,17 +569,36 @@ function App() {
                   </ul>
                 </li>
                 <li className="mt-2">Press <span className="font-semibold text-white">Enter / Space</span> to Fire.</li>
+                <li>Press <span className="font-semibold text-white">Esc</span> to Pause.</li>
                 <li>Eliminate all targets to win.</li>
               </ul>
               <button
                 ref={startButtonRef}
-                className="mt-6 w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold py-3 px-4 rounded-xl shadow-lg transform transition hover:scale-105 focus:ring-4 focus:ring-amber-500/50 focus:outline-none"
+                className="mt-6 w-full bg-gradient-to-r from-amber-700 to-orange-700 hover:from-amber-600 hover:to-orange-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg transform transition hover:scale-105 focus:ring-4 focus:ring-amber-500/50 focus:outline-none"
                 onClick={startGame}
               >
                 ENGAGE
               </button>
             </div>
           </div>)}
+
+        {isPaused && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="pause-title"
+          >
+             <div className="bg-gray-800 bg-opacity-90 border border-gray-500 rounded-xl p-8 flex flex-col items-center shadow-2xl">
+                <h2 id="pause-title" className="text-3xl font-bold text-white mb-4 tracking-widest">PAUSED</h2>
+                <div className="text-gray-300 flex items-center space-x-2">
+                    <span className="px-2 py-1 bg-gray-700 rounded border border-gray-600 text-sm font-mono text-white">ESC</span>
+                    <span>to resume</span>
+                </div>
+             </div>
+          </div>
+        )}
+
         {showWin && (
           <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80 backdrop-blur-sm"
