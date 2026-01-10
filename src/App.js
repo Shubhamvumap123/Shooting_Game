@@ -62,11 +62,12 @@ function App() {
     ctx.save();
     ctx.shadowBlur = 8; // Increased glow
     ctx.shadowColor = "white";
+    ctx.fillStyle = "white"; // Set color once
 
     stars.current.forEach(star => {
+      ctx.globalAlpha = star.alpha; // Use globalAlpha for performance
       ctx.beginPath();
       // Set color with dynamic alpha
-      ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
       ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
       ctx.fill();
 
@@ -102,7 +103,9 @@ function App() {
 
   function drawExplosions() {
     ctx.save();
-    explosions.current.forEach((exp, index) => {
+    // Iterate backwards to safely remove elements
+    for (let i = explosions.current.length - 1; i >= 0; i--) {
+        const exp = explosions.current[i];
         ctx.beginPath();
         ctx.arc(exp.x, exp.y, exp.radius, 0, Math.PI * 2);
         ctx.fillStyle = exp.color || `rgba(0, 255, 0, ${exp.alpha})`; // Use random color
@@ -117,9 +120,9 @@ function App() {
 
         // Remove if faded
         if (exp.alpha <= 0) {
-            explosions.current.splice(index, 1);
+            explosions.current.splice(i, 1);
         }
-    });
+    }
     ctx.restore();
   } 
 
@@ -265,7 +268,14 @@ function App() {
   bulletSprite.src = bulletImg;
 
   function drawbullet() {
-    if (bullet.length)
+    if (bullet.length) {
+      ctx.save();
+      // Set shadow properties once for all bullets
+      ctx.shadowColor = "rgba(255, 255, 0, 0.5)"; // Slight glow for bullets
+      ctx.shadowBlur = 2;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+
       for (var i = 0; i < bullet.length; i++) {
         const b = bullet[i];
         
@@ -278,15 +288,12 @@ function App() {
         ctx.translate(bCenterX, bCenterY);
         ctx.rotate(b.angle);
         ctx.translate(-bCenterX, -bCenterY);
-
-        ctx.shadowColor = "rgba(255, 255, 0, 0.5)"; // Slight glow for bullets
-        ctx.shadowBlur = 2;
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 0;
         
         ctx.drawImage(bulletSprite, b.x, b.y, 10, 20); 
         ctx.restore(); 
       }
+      ctx.restore();
+    }
   }
 
   // Bullet Move
@@ -404,7 +411,9 @@ function App() {
 
   function drawPowerups() {
       ctx.save();
-      powerups.current.forEach((p, index) => {
+      // Iterate backwards to safely remove elements
+      for (let i = powerups.current.length - 1; i >= 0; i--) {
+          const p = powerups.current[i];
           // Move
           p.y += 1.5;
 
@@ -424,7 +433,8 @@ function App() {
 
           // Remove if off screen
           if (p.y > LOGICAL_HEIGHT + 10) {
-              powerups.current.splice(index, 1);
+              powerups.current.splice(i, 1);
+              continue; // Skip collision check if removed
           }
 
           // Collision with Player
@@ -432,9 +442,9 @@ function App() {
           const dist = Math.hypot(p.x - (player_x + player_w/2), p.y - (player_y + player_h/2));
           if (dist < 15) {
               activatePowerup(p.type);
-              powerups.current.splice(index, 1);
+              powerups.current.splice(i, 1);
           }
-      });
+      }
       ctx.restore();
   }
 
