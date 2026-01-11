@@ -265,28 +265,32 @@ function App() {
   bulletSprite.src = bulletImg;
 
   function drawbullet() {
-    if (bullet.length)
-      for (var i = 0; i < bullet.length; i++) {
-        const b = bullet[i];
-        
-        ctx.save();
-        
-        // Translate to bullet position for rotation
-        const bCenterX = b.x + 5; // Half width (10/2)
-        const bCenterY = b.y + 10; // Half height (20/2)
-        
-        ctx.translate(bCenterX, bCenterY);
-        ctx.rotate(b.angle);
-        ctx.translate(-bCenterX, -bCenterY);
+    if (bullet.length === 0) return;
 
-        ctx.shadowColor = "rgba(255, 255, 0, 0.5)"; // Slight glow for bullets
-        ctx.shadowBlur = 2;
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 0;
-        
-        ctx.drawImage(bulletSprite, b.x, b.y, 10, 20); 
-        ctx.restore(); 
-      }
+    // Optimization: Batch canvas state changes for all bullets
+    ctx.save();
+    ctx.shadowColor = "rgba(255, 255, 0, 0.5)"; // Slight glow for bullets
+    ctx.shadowBlur = 2;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+
+    for (var i = 0; i < bullet.length; i++) {
+      const b = bullet[i];
+
+      ctx.save();
+
+      // Translate to bullet position for rotation
+      const bCenterX = b.x + 5; // Half width (10/2)
+      const bCenterY = b.y + 10; // Half height (20/2)
+
+      ctx.translate(bCenterX, bCenterY);
+      ctx.rotate(b.angle);
+      ctx.translate(-bCenterX, -bCenterY);
+
+      ctx.drawImage(bulletSprite, b.x, b.y, 10, 20);
+      ctx.restore();
+    }
+    ctx.restore();
   }
 
   // Bullet Move
