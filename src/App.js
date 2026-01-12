@@ -5,6 +5,12 @@ import target from './Target/TargetData';
 import spaceBg from './assets/space_bg.png';
 import bulletImg from './assets/hd_bullet.png';
 
+const Key = ({ children }) => (
+  <kbd className="bg-gray-700 border-b-2 border-gray-600 rounded px-1.5 py-0.5 text-xs md:text-sm font-bold text-amber-400 font-mono shadow-sm mx-0.5">
+    {children}
+  </kbd>
+);
+
 function App() {
   const [showGuide, setShowGuide] = useState(true);
   const [showWin, setShowWin] = useState(false);
@@ -550,14 +556,14 @@ function App() {
               <ul className="list-disc pl-5 space-y-2 text-sm md:text-base text-gray-300">
                 <li><span className="font-semibold text-white">Navigation:</span>
                   <ul className="pl-4 mt-1 space-y-1 list-none">
-                    <li><span className="text-amber-500">W / Up</span> : Move Up</li>
-                    <li><span className="text-amber-500">S / Down</span> : Move Down</li>
-                    <li><span className="text-amber-500">A / Left</span> : Move Left</li>
-                    <li><span className="text-amber-500">D / Right</span> : Move Right</li>
-                    <li><span className="text-amber-500">Q / E</span> : Rotate Ship</li>
+                    <li><Key>W</Key> / <Key>↑</Key> : Move Up</li>
+                    <li><Key>S</Key> / <Key>↓</Key> : Move Down</li>
+                    <li><Key>A</Key> / <Key>←</Key> : Move Left</li>
+                    <li><Key>D</Key> / <Key>→</Key> : Move Right</li>
+                    <li><Key>Q</Key> / <Key>E</Key> : Rotate Ship</li>
                   </ul>
                 </li>
-                <li className="mt-2">Press <span className="font-semibold text-white">Enter / Space</span> to Fire.</li>
+                <li className="mt-2">Press <Key>Enter</Key> / <Key>Space</Key> to Fire.</li>
                 <li>Eliminate all targets to win.</li>
               </ul>
               <button
