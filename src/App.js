@@ -63,6 +63,9 @@ function App() {
     ctx.shadowBlur = 8; // Increased glow
     ctx.shadowColor = "white";
 
+    // PERFORMANCE: Cache time to avoid 50+ Date.now() system calls per frame
+    const currentTime = Date.now();
+
     stars.current.forEach(star => {
       ctx.beginPath();
       // Set color with dynamic alpha
@@ -90,7 +93,7 @@ function App() {
       star.x -= star.speed;
       
       // Undeterministic Drift
-      star.y += Math.sin(Date.now() * star.driftSpeed) * star.driftAmplitude;
+      star.y += Math.sin(currentTime * star.driftSpeed) * star.driftAmplitude;
 
       if (star.x < 0) {
         star.x = LOGICAL_WIDTH;
