@@ -62,11 +62,12 @@ function App() {
     ctx.save();
     ctx.shadowBlur = 8; // Increased glow
     ctx.shadowColor = "white";
+    // Optimization: Using globalAlpha avoids expensive string parsing per frame (e.g., `rgba(...)`)
+    ctx.fillStyle = "white";
 
     stars.current.forEach(star => {
+      ctx.globalAlpha = star.alpha;
       ctx.beginPath();
-      // Set color with dynamic alpha
-      ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
       ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
       ctx.fill();
 
