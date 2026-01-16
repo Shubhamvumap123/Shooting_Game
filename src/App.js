@@ -59,14 +59,16 @@ function App() {
   }
 
   function drawStars() {
+    const now = Date.now(); // Optimization: Cache time outside loop
     ctx.save();
     ctx.shadowBlur = 8; // Increased glow
     ctx.shadowColor = "white";
+    ctx.fillStyle = "white"; // Optimization: Set color once
 
     stars.current.forEach(star => {
       ctx.beginPath();
-      // Set color with dynamic alpha
-      ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
+      // Optimization: Use globalAlpha instead of string parsing
+      ctx.globalAlpha = star.alpha;
       ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
       ctx.fill();
 
@@ -90,7 +92,7 @@ function App() {
       star.x -= star.speed;
       
       // Undeterministic Drift
-      star.y += Math.sin(Date.now() * star.driftSpeed) * star.driftAmplitude;
+      star.y += Math.sin(now * star.driftSpeed) * star.driftAmplitude;
 
       if (star.x < 0) {
         star.x = LOGICAL_WIDTH;
