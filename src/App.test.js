@@ -44,3 +44,9 @@ test('renders Mission Brief guide initially', () => {
   const guideTitle = screen.getByText(/Mission Brief/i);
   expect(guideTitle).toBeInTheDocument();
 });
+
+test('renders navigation keys', () => {
+  render(<App />);
+  expect(screen.getByText('W')).toBeInTheDocument();
+  expect(screen.getByText('↑')).toBeInTheDocument();
+});
