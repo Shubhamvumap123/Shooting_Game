@@ -29,8 +29,6 @@ function App() {
       rightKey = false, leftKey = false, upKey = false, downKey = false,
       qKey = false, eKey = false; // Rotation keys
 
-  let BullWidth = 3;
-  let BullHeight = 7;
   let playerImage = new Image();
   playerImage.src = gun;
 
@@ -58,15 +56,16 @@ function App() {
     }
   }
 
-  function drawStars() {
+  function drawStars(now) {
     ctx.save();
     ctx.shadowBlur = 8; // Increased glow
     ctx.shadowColor = "white";
+    ctx.fillStyle = "white";
 
     stars.current.forEach(star => {
       ctx.beginPath();
-      // Set color with dynamic alpha
-      ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
+      // Set color with dynamic alpha using globalAlpha for better performance
+      ctx.globalAlpha = star.alpha;
       ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
       ctx.fill();
 
@@ -90,7 +89,7 @@ function App() {
       star.x -= star.speed;
       
       // Undeterministic Drift
-      star.y += Math.sin(Date.now() * star.driftSpeed) * star.driftAmplitude;
+      star.y += Math.sin(now * star.driftSpeed) * star.driftAmplitude;
 
       if (star.x < 0) {
         star.x = LOGICAL_WIDTH;
@@ -333,11 +332,12 @@ function App() {
 
   //loop according to working
   function Looping(){     
+  const now = Date.now();
   backgroundRemove();
-  drawStars();
+  drawStars(now);
   drawExplosions();
   drawPowerups(); // Draw Powerups
-  handleMachineGun(); // Check auto fire
+  handleMachineGun(now); // Check auto fire
   movebullet();
   drawplayer();
   drawbullet();
@@ -450,9 +450,8 @@ function App() {
 
   // Machine Gun Logic (Auto Fire)
   const lastShotTime = useRef(0);
-  function handleMachineGun() {
+  function handleMachineGun(now) {
       if (activeEffects.current.machineGun && spacePressed.current) {
-          const now = Date.now();
           if (now - lastShotTime.current > 100) { // Fire every 100ms
               fireBullet();
               lastShotTime.current = now;
