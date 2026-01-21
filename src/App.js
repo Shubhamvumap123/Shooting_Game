@@ -102,7 +102,9 @@ function App() {
 
   function drawExplosions() {
     ctx.save();
-    explosions.current.forEach((exp, index) => {
+    // Iterate backwards to prevent skipping elements when splicing
+    for (let i = explosions.current.length - 1; i >= 0; i--) {
+        const exp = explosions.current[i];
         ctx.beginPath();
         ctx.arc(exp.x, exp.y, exp.radius, 0, Math.PI * 2);
         ctx.fillStyle = exp.color || `rgba(0, 255, 0, ${exp.alpha})`; // Use random color
@@ -117,9 +119,9 @@ function App() {
 
         // Remove if faded
         if (exp.alpha <= 0) {
-            explosions.current.splice(index, 1);
+            explosions.current.splice(i, 1);
         }
-    });
+    }
     ctx.restore();
   } 
 
@@ -341,7 +343,9 @@ function App() {
   movebullet();
   drawplayer();
   drawbullet();
-  target.forEach((tar) =>{
+  // Iterate backwards to safely remove targets
+  for (let i = target.length - 1; i >= 0; i--) {
+    const tar = target[i];
     tar.update(LOGICAL_WIDTH, LOGICAL_HEIGHT);
     tar.draw(ctx);
     if (checkcolidewith(tar)) {
@@ -368,11 +372,10 @@ function App() {
             });
         }
 
-        const index = target.indexOf(tar);
-        target.splice(index, 1);
+        target.splice(i, 1);
       }
     }
-  });
+  }
 
     // Show win animation if all targets are killed
     if (target.length === 0 && !showWin) {
@@ -404,7 +407,9 @@ function App() {
 
   function drawPowerups() {
       ctx.save();
-      powerups.current.forEach((p, index) => {
+      // Iterate backwards to prevent skipping elements when splicing
+      for (let i = powerups.current.length - 1; i >= 0; i--) {
+          const p = powerups.current[i];
           // Move
           p.y += 1.5;
 
@@ -422,19 +427,23 @@ function App() {
           ctx.textAlign = "center";
           ctx.fillText(p.type === 'tripleShot' ? 'T' : 'M', p.x, p.y + 3);
 
+          let removed = false;
           // Remove if off screen
           if (p.y > LOGICAL_HEIGHT + 10) {
-              powerups.current.splice(index, 1);
+              powerups.current.splice(i, 1);
+              removed = true;
           }
 
-          // Collision with Player
-          // Simple box/circle collision
-          const dist = Math.hypot(p.x - (player_x + player_w/2), p.y - (player_y + player_h/2));
-          if (dist < 15) {
-              activatePowerup(p.type);
-              powerups.current.splice(index, 1);
+          if (!removed) {
+              // Collision with Player
+              // Simple box/circle collision
+              const dist = Math.hypot(p.x - (player_x + player_w/2), p.y - (player_y + player_h/2));
+              if (dist < 15) {
+                  activatePowerup(p.type);
+                  powerups.current.splice(i, 1);
+              }
           }
-      });
+      }
       ctx.restore();
   }
 
