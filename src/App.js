@@ -521,6 +521,13 @@ function App() {
     isGameActive.current = true;
   };
 
+  // Keyboard key component for better UX
+  const Key = ({ children }) => (
+    <kbd className="inline-flex items-center justify-center min-w-[1.5em] px-1.5 py-0.5 mx-1 text-xs font-bold text-gray-800 bg-gray-100 border-b-2 border-gray-300 rounded font-mono shadow-sm align-middle">
+      {children}
+    </kbd>
+  );
+
   return (
     <div className=' bg-gray-900 '>
       <div className='flex items-center justify-center h-screen'>
@@ -550,14 +557,14 @@ function App() {
               <ul className="list-disc pl-5 space-y-2 text-sm md:text-base text-gray-300">
                 <li><span className="font-semibold text-white">Navigation:</span>
                   <ul className="pl-4 mt-1 space-y-1 list-none">
-                    <li><span className="text-amber-500">W / Up</span> : Move Up</li>
-                    <li><span className="text-amber-500">S / Down</span> : Move Down</li>
-                    <li><span className="text-amber-500">A / Left</span> : Move Left</li>
-                    <li><span className="text-amber-500">D / Right</span> : Move Right</li>
-                    <li><span className="text-amber-500">Q / E</span> : Rotate Ship</li>
+                    <li><Key>W</Key> / <Key>↑</Key> : Move Up</li>
+                    <li><Key>S</Key> / <Key>↓</Key> : Move Down</li>
+                    <li><Key>A</Key> / <Key>←</Key> : Move Left</li>
+                    <li><Key>D</Key> / <Key>→</Key> : Move Right</li>
+                    <li><Key>Q</Key> / <Key>E</Key> : Rotate Ship</li>
                   </ul>
                 </li>
-                <li className="mt-2">Press <span className="font-semibold text-white">Enter / Space</span> to Fire.</li>
+                <li className="mt-2">Press <Key>Enter</Key> / <Key>Space</Key> to Fire.</li>
                 <li>Eliminate all targets to win.</li>
               </ul>
               <button
@@ -576,8 +583,8 @@ function App() {
             aria-modal="true"
             aria-labelledby="victory-title"
           >
-            <div className="bg-gray-800 bg-opacity-90 border-2 border-green-500/50 rounded-2xl shadow-[0_0_50px_rgba(34,197,94,0.3)] p-8 flex flex-col items-center animate-bounce">
-              <svg className="w-20 h-20 text-green-400 mb-4 animate-pulse drop-shadow-[0_0_10px_rgba(74,222,128,0.5)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="bg-gray-800 bg-opacity-90 border-2 border-green-500/50 rounded-2xl shadow-[0_0_50px_rgba(34,197,94,0.3)] p-8 flex flex-col items-center motion-safe:animate-bounce">
+              <svg aria-hidden="true" className="w-20 h-20 text-green-400 mb-4 animate-pulse drop-shadow-[0_0_10px_rgba(74,222,128,0.5)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M9 12l2 2 4-4" />
               </svg>
