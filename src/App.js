@@ -5,6 +5,12 @@ import target from './Target/TargetData';
 import spaceBg from './assets/space_bg.png';
 import bulletImg from './assets/hd_bullet.png';
 
+const Key = ({ children }) => (
+  <kbd className="inline-flex items-center justify-center min-w-[20px] h-6 px-1.5 mx-0.5 text-xs font-bold text-gray-700 bg-gray-100 border-b-2 border-gray-300 rounded shadow-sm hover:bg-white hover:border-b transition-all">
+    {children}
+  </kbd>
+);
+
 function App() {
   const [showGuide, setShowGuide] = useState(true);
   const [showWin, setShowWin] = useState(false);
@@ -550,14 +556,14 @@ function App() {
               <ul className="list-disc pl-5 space-y-2 text-sm md:text-base text-gray-300">
                 <li><span className="font-semibold text-white">Navigation:</span>
                   <ul className="pl-4 mt-1 space-y-1 list-none">
-                    <li><span className="text-amber-500">W / Up</span> : Move Up</li>
-                    <li><span className="text-amber-500">S / Down</span> : Move Down</li>
-                    <li><span className="text-amber-500">A / Left</span> : Move Left</li>
-                    <li><span className="text-amber-500">D / Right</span> : Move Right</li>
-                    <li><span className="text-amber-500">Q / E</span> : Rotate Ship</li>
+                    <li><span className="text-amber-500"><Key>W</Key> / <Key>Up</Key></span> : Move Up</li>
+                    <li><span className="text-amber-500"><Key>S</Key> / <Key>Down</Key></span> : Move Down</li>
+                    <li><span className="text-amber-500"><Key>A</Key> / <Key>Left</Key></span> : Move Left</li>
+                    <li><span className="text-amber-500"><Key>D</Key> / <Key>Right</Key></span> : Move Right</li>
+                    <li><span className="text-amber-500"><Key>Q</Key> / <Key>E</Key></span> : Rotate Ship</li>
                   </ul>
                 </li>
-                <li className="mt-2">Press <span className="font-semibold text-white">Enter / Space</span> to Fire.</li>
+                <li className="mt-2">Press <span className="font-semibold text-white"><Key>Enter</Key> / <Key>Space</Key></span> to Fire.</li>
                 <li>Eliminate all targets to win.</li>
               </ul>
               <button
