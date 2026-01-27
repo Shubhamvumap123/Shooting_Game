@@ -2,14 +2,14 @@ const { test, expect } = require('@playwright/test');
 
 test('UX Focus Management and Guide Display', async ({ page }) => {
   // Go to the app
-  await page.goto('http://localhost:3000');
+  await page.goto('http://localhost:3001');
 
-  // Check if "How to Play" modal is visible
-  const guideTitle = page.locator('text=How to Play');
+  // Check if "Mission Brief" modal is visible
+  const guideTitle = page.locator('text=Mission Brief');
   await expect(guideTitle).toBeVisible();
 
-  // Check if "Start Game" button is focused
-  const startButton = page.locator('button:has-text("Start Game")');
+  // Check if "ENGAGE" button is focused
+  const startButton = page.locator('button:has-text("ENGAGE")');
   await expect(startButton).toBeFocused();
 
   // Take a screenshot of the initial state
@@ -21,8 +21,7 @@ test('UX Focus Management and Guide Display', async ({ page }) => {
   // Check if guide is hidden
   await expect(guideTitle).not.toBeVisible();
 
-  // Since we can't easily win the game in a test, we verify the start interaction worked.
-  // We can verify the canvas is visible.
+  // Verify the canvas is visible.
   const canvas = page.locator('canvas');
   await expect(canvas).toBeVisible();
 });
