@@ -62,11 +62,15 @@ function App() {
     ctx.save();
     ctx.shadowBlur = 8; // Increased glow
     ctx.shadowColor = "white";
+    ctx.fillStyle = "white"; // Bolt: Set once to avoid repeated string parsing
+
+    const now = Date.now(); // Bolt: Cache time outside loop
 
     stars.current.forEach(star => {
       ctx.beginPath();
       // Set color with dynamic alpha
-      ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
+      // Bolt: Use globalAlpha instead of template literals
+      ctx.globalAlpha = star.alpha;
       ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
       ctx.fill();
 
@@ -90,7 +94,7 @@ function App() {
       star.x -= star.speed;
       
       // Undeterministic Drift
-      star.y += Math.sin(Date.now() * star.driftSpeed) * star.driftAmplitude;
+      star.y += Math.sin(now * star.driftSpeed) * star.driftAmplitude;
 
       if (star.x < 0) {
         star.x = LOGICAL_WIDTH;
@@ -307,9 +311,9 @@ function App() {
 
 // Check for Bullet Collide
    function checkcolidewith(target){
-      return bullet.some((bull) => {
+      return bullet.some((bull, index) => {
         if (collideWith(bull,target)===true) {
-          bullet.splice(bullet.indexOf(bull), 1);
+          bullet.splice(index, 1); // Bolt: Use index directly
           return true;
         }
        return false
@@ -341,7 +345,10 @@ function App() {
   movebullet();
   drawplayer();
   drawbullet();
-  target.forEach((tar) =>{
+
+  // Bolt: Iterate backwards to safely remove elements and avoid O(N^2) indexOf lookups
+  for (let i = target.length - 1; i >= 0; i--) {
+    const tar = target[i];
     tar.update(LOGICAL_WIDTH, LOGICAL_HEIGHT);
     tar.draw(ctx);
     if (checkcolidewith(tar)) {
@@ -368,11 +375,10 @@ function App() {
             });
         }
 
-        const index = target.indexOf(tar);
-        target.splice(index, 1);
+        target.splice(i, 1);
       }
     }
-  });
+  }
 
     // Show win animation if all targets are killed
     if (target.length === 0 && !showWin) {
