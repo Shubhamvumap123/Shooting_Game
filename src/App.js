@@ -341,7 +341,9 @@ function App() {
   movebullet();
   drawplayer();
   drawbullet();
-  target.forEach((tar) =>{
+  // Iterate backwards to optimize splicing and avoid O(n) indexOf lookup
+  for (let i = target.length - 1; i >= 0; i--) {
+    const tar = target[i];
     tar.update(LOGICAL_WIDTH, LOGICAL_HEIGHT);
     tar.draw(ctx);
     if (checkcolidewith(tar)) {
@@ -368,11 +370,10 @@ function App() {
             });
         }
 
-        const index = target.indexOf(tar);
-        target.splice(index, 1);
+        target.splice(i, 1);
       }
     }
-  });
+  }
 
     // Show win animation if all targets are killed
     if (target.length === 0 && !showWin) {
